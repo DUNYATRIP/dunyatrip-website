@@ -248,7 +248,7 @@ async function saveWebsiteEnquiry(enquiry){
  if(!SUPABASE_URL.startsWith("https://") || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith("PASTE_")){
   throw new Error("Enquiry saving is not configured yet. Please contact us on WhatsApp.");
  }
- const response=await fetch(SUPABASE_URL.replace(/\\/$/,"")+"/rest/v1/enquiries",{
+ const response=await fetch(SUPABASE_URL.replace(/\/$/,"")+"/rest/v1/enquiries",{
   method:"POST",
   headers:{
    apikey:SUPABASE_ANON_KEY,
@@ -280,8 +280,8 @@ async function sendSearch(event){
  const travellers=document.getElementById("travellers").value;
  const enquiryType=document.getElementById("searchType").value;
  const serviceType=enquiryType==="Flight enquiry"?"Flights":enquiryType==="Hotel enquiry"?"Hotels":"Other";
- const details=enquiryType+"\\nFrom: "+from+"\\nDestination: "+destination+"\\nDeparture date: "+date+"\\nTravellers: "+travellers;
- const whatsappMessage="DunyaTrip "+enquiryType+"\\nName: "+name+"\\nPhone: "+phone+"\\n"+details;
+ const details=enquiryType+"\nFrom: "+from+"\nDestination: "+destination+"\nDeparture date: "+date+"\nTravellers: "+travellers;
+ const whatsappMessage="DunyaTrip "+enquiryType+"\nName: "+name+"\nPhone: "+phone+"\n"+details;
  const whatsappWindow=window.open("about:blank","_blank");
  setSubmitting("searchSubmit",true,"Send Enquiry →");
  setFeedback("searchFeedback","Saving your enquiry…");
@@ -311,8 +311,8 @@ async function sendContact(event){
   selectedService==="Umrah Packages"?"Umrah":
   selectedService==="B2B Partnership"?"B2B":
   selectedService.includes("Visa")||selectedService.includes("Embassy")?"Visa":"Other";
- const savedMessage="Service requested: "+selectedService+(message?"\\n\\n"+message:"");
- const whatsappMessage="DunyaTrip Enquiry\\nName: "+name+"\\nPhone: "+phone+"\\nService: "+selectedService+"\\nMessage: "+message;
+ const savedMessage="Service requested: "+selectedService+(message?"\n\n"+message:"");
+ const whatsappMessage="DunyaTrip Enquiry\nName: "+name+"\nPhone: "+phone+"\nService: "+selectedService+"\nMessage: "+message;
  const whatsappWindow=window.open("about:blank","_blank");
  setSubmitting("contactSubmit",true,"Submit Enquiry →");
  setFeedback("contactFeedback","Saving your enquiry…");
