@@ -138,9 +138,11 @@ footer a{display:block;margin:7px 0}
     <div class="field"><label>TO / DESTINATION</label><input id="to" placeholder="e.g. Dubai" required></div>
     <div class="field"><label>DEPARTURE DATE</label><input id="date" type="date" required></div>
     <div class="field"><label>TRAVELLERS</label><select id="travellers"><option>1 Traveller</option><option>2 Travellers</option><option>3 Travellers</option><option>4 Travellers</option><option>5+ Travellers</option></select></div>
+    <div class="field"><label>YOUR NAME</label><input id="searchName" placeholder="Enter your name" autocomplete="name" required></div>
+    <div class="field"><label>PHONE / WHATSAPP</label><input id="searchPhone" type="tel" placeholder="+92..." autocomplete="tel" required></div>
    </div>
-   <div class="search-row"><button class="btn" type="submit">Send Enquiry →</button></div>
-   <p class="note">This is an enquiry form, not a live booking or payment system. Our team will help with availability and prices.</p>
+   <div class="search-row"><button class="btn" id="searchSubmit" type="submit">Send Enquiry →</button></div>
+   <p class="note" id="searchFeedback" role="status" aria-live="polite">This is an enquiry form, not a live booking or payment system. Your enquiry will be saved and WhatsApp will open for follow-up.</p>
   </form>
  </div>
 </div>
@@ -200,8 +202,8 @@ footer a{display:block;margin:7px 0}
    <label>Phone / WhatsApp</label><input id="phone" placeholder="+92..." required>
    <label>Service Required</label><select id="service"><option>Flights</option><option>Hotels</option><option>Visit Visa Assistance</option><option>Visa File Preparation</option><option>Embassy Appointment Assistance</option><option>Umrah Packages</option><option>B2B Partnership</option></select>
    <label>Message</label><textarea id="message" placeholder="Tell us about your travel plans"></textarea>
-   <button class="btn" type="submit">Submit Enquiry →</button>
-   <p class="note">Enquiries will open in WhatsApp once the business number is configured.</p>
+   <button class="btn" id="contactSubmit" type="submit">Submit Enquiry →</button>
+   <p class="note" id="contactFeedback" role="status" aria-live="polite">Your enquiry will be saved securely and WhatsApp will open for follow-up.</p>
   </form>
  </div>
 </section>
@@ -218,36 +220,114 @@ footer a{display:block;margin:7px 0}
  </div>
 </footer>
 
+<script src="supabase-config.js"></script>
 <script>
-const WHATSAPP_NUMBER = "923071201353"; // Replace with your business WhatsApp number
-function sendWhatsApp(message){
- if(WHATSAPP_NUMBER.includes("X")){
-  alert("Website design is ready! Add your business WhatsApp number in the code to receive enquiries.");
-  return;
+const WHATSAPP_NUMBER = "923071201353"; // Existing website WhatsApp destination
+// Public browser configuration is kept in supabase-config.js.
+// The anon/publishable key is designed for browser use; RLS protects customer data.
+const SUPABASE_CONFIG = window.DUNYATRIP_SUPABASE_CONFIG || {};
+const SUPABASE_URL = SUPABASE_CONFIG.url || "";
+const SUPABASE_ANON_KEY = SUPABASE_CONFIG.anonKey || "";
+
+function setFeedback(id,message,isError=false){
+ const element=document.getElementById(id);
+ if(!element) return;
+ element.textContent=message;
+ element.style.color=isError?"#b42318":"";
+}
+function setSubmitting(buttonId,isSubmitting,label){
+ const button=document.getElementById(buttonId);
+ if(!button) return;
+ button.disabled=isSubmitting;
+ button.textContent=isSubmitting?"Saving enquiry…":label;
+}
+function whatsappUrl(message){
+ return "https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(message);
+}
+async function saveWebsiteEnquiry(enquiry){
+ if(!SUPABASE_URL.startsWith("https://") || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith("PASTE_")){
+  throw new Error("Enquiry saving is not configured yet. Please contact us on WhatsApp.");
  }
- window.open("https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(message),"_blank");
+ const response=await fetch(SUPABASE_URL.replace(/\/$/,"")+"/rest/v1/enquiries",{
+  method:"POST",
+  headers:{
+   apikey:SUPABASE_ANON_KEY,
+   Authorization:"Bearer "+SUPABASE_ANON_KEY,
+   "Content-Type":"application/json",
+   Prefer:"return=minimal"
+  },
+  body:JSON.stringify(enquiry)
+ });
+ if(!response.ok){
+  const body=await response.json().catch(()=>({}));
+  throw new Error(body.message||body.details||"We could not save your enquiry. Please try again or contact us on WhatsApp.");
+ }
 }
 function setTab(button,type){
  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
  button.classList.add("active");
  document.getElementById("searchType").value=type;
 }
-function sendSearch(event){
+async function sendSearch(event){
  event.preventDefault();
- const msg="DunyaTrip "+document.getElementById("searchType").value+
- "\nFrom: "+document.getElementById("from").value+
- "\nDestination: "+document.getElementById("to").value+
- "\nDate: "+document.getElementById("date").value+
- "\nTravellers: "+document.getElementById("travellers").value;
- sendWhatsApp(msg);
+ const form=event.currentTarget;
+ if(!form.reportValidity()) return;
+ const name=document.getElementById("searchName").value.trim();
+ const phone=document.getElementById("searchPhone").value.trim();
+ const from=document.getElementById("from").value.trim();
+ const destination=document.getElementById("to").value.trim();
+ const date=document.getElementById("date").value;
+ const travellers=document.getElementById("travellers").value;
+ const enquiryType=document.getElementById("searchType").value;
+ const serviceType=enquiryType==="Flight enquiry"?"Flights":enquiryType==="Hotel enquiry"?"Hotels":"Other";
+ const details=enquiryType+"\nFrom: "+from+"\nDestination: "+destination+"\nDeparture date: "+date+"\nTravellers: "+travellers;
+ const whatsappMessage="DunyaTrip "+enquiryType+"\nName: "+name+"\nPhone: "+phone+"\n"+details;
+ const whatsappWindow=window.open("about:blank","_blank");
+ setSubmitting("searchSubmit",true,"Send Enquiry →");
+ setFeedback("searchFeedback","Saving your enquiry…");
+ try{
+  await saveWebsiteEnquiry({customer_name:name,phone:phone,service_type:serviceType,travel_date:date,message:details});
+  if(whatsappWindow){whatsappWindow.location.href=whatsappUrl(whatsappMessage);}
+  else{setFeedback("searchFeedback","Enquiry saved! Your browser blocked the WhatsApp pop-up. Please open WhatsApp using the contact link.");}
+  if(whatsappWindow) setFeedback("searchFeedback","Enquiry saved successfully. Opening WhatsApp…");
+  form.reset();
+ }catch(error){
+  if(whatsappWindow) whatsappWindow.close();
+  setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);
+ }finally{
+  setSubmitting("searchSubmit",false,"Send Enquiry →");
+ }
 }
-function sendContact(event){
+async function sendContact(event){
  event.preventDefault();
- const msg="DunyaTrip Enquiry\nName: "+document.getElementById("name").value+
- "\nPhone: "+document.getElementById("phone").value+
- "\nService: "+document.getElementById("service").value+
- "\nMessage: "+document.getElementById("message").value;
- sendWhatsApp(msg);
+ const form=event.currentTarget;
+ if(!form.reportValidity()) return;
+ const name=document.getElementById("name").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const selectedService=document.getElementById("service").value;
+ const message=document.getElementById("message").value.trim();
+ const serviceType=selectedService==="Flights"?"Flights":
+  selectedService==="Hotels"?"Hotels":
+  selectedService==="Umrah Packages"?"Umrah":
+  selectedService==="B2B Partnership"?"B2B":
+  selectedService.includes("Visa")||selectedService.includes("Embassy")?"Visa":"Other";
+ const savedMessage="Service requested: "+selectedService+(message?"\n\n"+message:"");
+ const whatsappMessage="DunyaTrip Enquiry\nName: "+name+"\nPhone: "+phone+"\nService: "+selectedService+"\nMessage: "+message;
+ const whatsappWindow=window.open("about:blank","_blank");
+ setSubmitting("contactSubmit",true,"Submit Enquiry →");
+ setFeedback("contactFeedback","Saving your enquiry…");
+ try{
+  await saveWebsiteEnquiry({customer_name:name,phone:phone,service_type:serviceType,message:savedMessage});
+  if(whatsappWindow){whatsappWindow.location.href=whatsappUrl(whatsappMessage);}
+  else{setFeedback("contactFeedback","Enquiry saved! Your browser blocked the WhatsApp pop-up. Please contact us on WhatsApp.");}
+  if(whatsappWindow) setFeedback("contactFeedback","Enquiry saved successfully. Opening WhatsApp…");
+  form.reset();
+ }catch(error){
+  if(whatsappWindow) whatsappWindow.close();
+  setFeedback("contactFeedback",error.message||"Could not save enquiry. Please try again.",true);
+ }finally{
+  setSubmitting("contactSubmit",false,"Submit Enquiry →");
+ }
 }
 document.getElementById("year").textContent=new Date().getFullYear();
 </script>
