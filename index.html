@@ -219,13 +219,41 @@ footer a{display:block;margin:7px 0}
 </footer>
 
 <script>
-const WHATSAPP_NUMBER = "923071201353"; // Replace with your business WhatsApp number
-function sendWhatsApp(message){
- if(WHATSAPP_NUMBER.includes("X")){
-  alert("Website design is ready! Add your business WhatsApp number in the code to receive enquiries.");
+const WHATSAPP_NUMBER = "923071201353"; // Existing site number; confirm before relying on it
+const SUPABASE_URL = "https://czmfvupgvnesxfdfkdpn.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ucfnKJMBza5FMA_MZ39KzR4";
+function openWhatsApp(message){
+ if(!WHATSAPP_NUMBER || WHATSAPP_NUMBER.includes("X")){
+  alert("WhatsApp number is not configured. Your enquiry will still be saved if the database is available.");
   return;
  }
  window.open("https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(message),"_blank");
+}
+async function saveEnquiry(data){
+ const response=await fetch(SUPABASE_URL+"/rest/v1/enquiries",{
+  method:"POST",
+  headers:{
+   "apikey":SUPABASE_PUBLISHABLE_KEY,
+   "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY,
+   "Content-Type":"application/json",
+   "Prefer":"return=minimal"
+  },
+  body:JSON.stringify(data)
+ });
+ if(!response.ok){
+  const detail=await response.text().catch(()=> "");
+  throw new Error("Enquiry could not be saved ("+response.status+"). "+detail.slice(0,240));
+ }
+}
+function submitEnquiry(data,message){
+ // Open WhatsApp during the user click so browser popup blockers do not discard it.
+ openWhatsApp(message);
+ saveEnquiry(data).then(()=>{
+  alert("Your enquiry has been saved. Our team can now view it in the DunyaTrip admin panel.");
+ }).catch(error=>{
+  console.error(error);
+  alert("WhatsApp has opened, but the enquiry was not saved to the admin system. Please send your enquiry on WhatsApp and notify the team. "+error.message);
+ });
 }
 function setTab(button,type){
  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -234,20 +262,37 @@ function setTab(button,type){
 }
 function sendSearch(event){
  event.preventDefault();
- const msg="DunyaTrip "+document.getElementById("searchType").value+
+ const type=document.getElementById("searchType").value;
+ const msg="DunyaTrip "+type+
  "\nFrom: "+document.getElementById("from").value+
  "\nDestination: "+document.getElementById("to").value+
  "\nDate: "+document.getElementById("date").value+
  "\nTravellers: "+document.getElementById("travellers").value;
- sendWhatsApp(msg);
+ submitEnquiry({
+  customer_name:"Website visitor",
+  phone:"Not provided",
+  service_type:type,
+  message:msg,
+  status:"New"
+ },msg);
 }
 function sendContact(event){
  event.preventDefault();
- const msg="DunyaTrip Enquiry\nName: "+document.getElementById("name").value+
- "\nPhone: "+document.getElementById("phone").value+
- "\nService: "+document.getElementById("service").value+
- "\nMessage: "+document.getElementById("message").value;
- sendWhatsApp(msg);
+ const name=document.getElementById("name").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const service=document.getElementById("service").value;
+ const message=document.getElementById("message").value.trim();
+ const msg="DunyaTrip Enquiry\nName: "+name+
+ "\nPhone: "+phone+
+ "\nService: "+service+
+ "\nMessage: "+message;
+ submitEnquiry({
+  customer_name:name,
+  phone:phone,
+  service_type:service,
+  message:message,
+  status:"New"
+ },msg);
 }
 document.getElementById("year").textContent=new Date().getFullYear();
 </script>
