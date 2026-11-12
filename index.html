@@ -220,11 +220,14 @@ footer a{display:block;margin:7px 0}
  </div>
 </footer>
 
+<script src="supabase-config.js"></script>
 <script>
 const WHATSAPP_NUMBER = "923071201353"; // Existing website WhatsApp destination
-// These are public browser credentials, not secrets. RLS must restrict this key to INSERT only.
-const SUPABASE_URL = "PASTE_SUPABASE_PROJECT_URL";
-const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY";
+// Public browser configuration is kept in supabase-config.js.
+// The anon/publishable key is designed for browser use; RLS protects customer data.
+const SUPABASE_CONFIG = window.DUNYATRIP_SUPABASE_CONFIG || {};
+const SUPABASE_URL = SUPABASE_CONFIG.url || "";
+const SUPABASE_ANON_KEY = SUPABASE_CONFIG.anonKey || "";
 
 function setFeedback(id,message,isError=false){
  const element=document.getElementById(id);
