@@ -135,7 +135,8 @@ footer a{display:block;margin:7px 0}
    <div class="fields service-fields" id="serviceFields">
     <div class="field"><label>FROM</label><input id="from" placeholder="City or airport" required></div><div class="field"><label>TO</label><input id="to" placeholder="Where to?" required></div><div class="field"><label>DEPART</label><input id="date" type="date" required></div><div class="field"><label>TRAVELLERS</label><select id="travellers"><option>1 Adult</option><option>2 Adults</option><option>3 Adults</option><option>4 Adults</option><option>Family</option></select></div><div class="field"><label>YOUR NAME</label><input id="searchName" placeholder="Your name" required></div><div class="field"><label>PHONE / WHATSAPP</label><input id="searchPhone" type="tel" placeholder="+92..." required></div>
    </div>
-   <div class="booking-bottom"><p class="note" id="searchFeedback" role="status" aria-live="polite">No account or sign-in required. Enter your details to send a booking request. Our team will confirm availability and next steps; this is not a live payment system.</p><button class="btn" id="searchSubmit" type="submit">Search Flights →</button></div>
+   <div id="contactStep" class="fields service-fields" style="display:none;margin-top:16px"><div class="field"><label>YOUR NAME</label><input id="searchName" placeholder="Your name" autocomplete="name"></div><div class="field"><label>PHONE / WHATSAPP</label><input id="searchPhone" type="tel" placeholder="+92..." autocomplete="tel"></div></div>
+   <div class="booking-bottom"><p class="note" id="searchFeedback" role="status" aria-live="polite">Select your trip details and search. Our team can help confirm options and availability.</p><button class="btn" id="searchSubmit" type="submit">Search Flights →</button></div>
   </form>
  </div>
 </div>
@@ -281,18 +282,20 @@ function selectService(button,service){
  else if(service==="Insurance"){html=select("INSURANCE TYPE","insuranceType",["Travel Insurance","Schengen Travel Insurance","Family Travel Insurance","Group Travel Insurance","Other Insurance"])+input("DESTINATION","destination","Country / region")+input("TRAVEL START DATE","startDate","","date")+input("TRAVEL END DATE","endDate","","date")+select("TRAVELLERS","travellers",["1 Person","2 People","3 People","4 People","5+ People"]);heading.textContent="Travel insurance enquiry";feedback.textContent="Share your trip details and our team will help with suitable travel insurance options and quotations.";}
  else{html=input("BOOKING REFERENCE","reference","Enter your booking reference")+input("PHONE / EMAIL","contactdetail","Phone or email");heading.textContent="Find your booking";feedback.textContent="Enter your reference and contact detail for help locating an existing booking.";}
  html+=input("YOUR NAME","searchName","Your name")+input("PHONE / WHATSAPP","searchPhone","+92...");
- fields.innerHTML=html;submit.textContent=service==="Flights"?"Search Flights →":service==="Hotels"?"Search Hotels →":service==="Cars"?"Search Cars →":service==="Tours"?"Search Tours →":service==="Umrah"?"Continue →":service==="Visa"?"Continue →":service==="Appointment Booking"?"Continue →":service==="File Preparation"?"Continue →":service==="Insurance"?"Continue →":"Continue →";
+ fields.innerHTML=html;document.getElementById("contactStep").style.display="none";document.getElementById("searchName").required=false;document.getElementById("searchPhone").required=false;document.getElementById("serviceSearchForm").dataset.contactReady="";submit.textContent=service==="Flights"?"Search Flights →":service==="Hotels"?"Search Hotels →":service==="Cars"?"Search Cars →":service==="Tours"?"Search Tours →":service==="Umrah"?"Continue →":service==="Visa"?"Continue →":service==="Appointment Booking"?"Continue →":service==="File Preparation"?"Continue →":service==="Insurance"?"Continue →":"Continue →";
 }
 async function sendSearch(event){
- event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;
+ event.preventDefault();const form=event.currentTarget;const contactStep=document.getElementById("contactStep");
+ if(!form.dataset.contactReady){if(!form.querySelector("#serviceFields").reportValidity())return;form.dataset.contactReady="yes";contactStep.style.display="grid";document.getElementById("searchName").required=true;document.getElementById("searchPhone").required=true;document.getElementById("searchSubmit").textContent="Send Request →";setFeedback("searchFeedback","Search details ready. Ab representative ke callback ke liye apna naam aur WhatsApp number dein.");contactStep.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
+ if(!form.reportValidity())return;
  const name=document.getElementById("searchName").value.trim(),phone=document.getElementById("searchPhone").value.trim();
- const values=[...form.querySelectorAll("#serviceFields input:not(#searchName):not(#searchPhone),#serviceFields select")].filter(e=>e.value).map(e=>e.previousElementSibling.textContent+": "+e.value);
+ const values=[...form.querySelectorAll("#serviceFields input,#serviceFields select")].filter(e=>e.value).map(e=>e.previousElementSibling.textContent+": "+e.value);
  const details=selectedService+" enquiry\n"+values.join("\n")+(selectedService==="Flights"?"\nTrip type: "+document.getElementById("tripType").value:"");
  const mapped=selectedService==="Flights"?"Flights":selectedService==="Hotels"?"Hotels":selectedService==="Umrah"?"Umrah":selectedService==="Visa"?"Visa":"Other";
  const w=window.open("about:blank","_blank");setSubmitting("searchSubmit",true,"Saving enquiry…");setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
  try{await saveWebsiteEnquiry({customer_name:name,phone:phone,service_type:mapped,travel_date:form.querySelector('input[type="date"]')?.value||null,message:details});if(w)w.location.href=whatsappUrl("DunyaTrip "+selectedService+" Enquiry\nName: "+name+"\nPhone: "+phone+"\n"+details);setFeedback("searchFeedback",w?"Request receive ho gayi! Hamara representative 10 minutes ke andar aap se rabta karega. WhatsApp message bhi open ho raha hai.":"Request receive ho gayi! Hamara representative 10 minutes ke andar aap se rabta karega.");form.reset();}
  catch(error){if(w)w.close();setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);}
- finally{setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Send Enquiry →");}
+ finally{setSubmitting("searchSubmit",false,"Send Request →");}
 }
 async function sendContact(event){
  event.preventDefault();
