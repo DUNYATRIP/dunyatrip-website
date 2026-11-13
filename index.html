@@ -399,11 +399,11 @@ async function sendSearch(event){
  setSubmitting("searchSubmit",true,"Sending request…");
  setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
  try{
-  await saveWebsiteEnquiry({customer_name:null,phone:phone,service_type:mapped,travel_date:fields.querySelector('input[type="date"]')?.value||null,message:details});
+  await saveWebsiteEnquiry({customer_name:"Website visitor",phone:phone,service_type:mapped,travel_date:fields.querySelector('input[type="date"]')?.value||null,message:details});
   const url=whatsappUrl("DunyaTrip Enquiry\\nWhatsApp: "+phone+"\\n\\n"+details+"\\n\\nPlease contact the customer within 10 minutes.");
   if(waWindow){waWindow.location.href=url;}
   else{window.location.href=url;}
-  setFeedback("searchFeedback","Request receive ho gayi! WhatsApp par Send press karein. Representative 10 minutes ke andar aapko contact karega.");
+  setFeedback("searchFeedback","Thank you! Aapki enquiry receive ho gayi hai. DunyaTrip team aapko diye gaye WhatsApp number par 10 minutes ke andar contact karegi.");
   form.reset();
   form.dataset.contactReady="";
   contactStep.style.display="none";
