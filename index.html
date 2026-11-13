@@ -330,17 +330,16 @@ function addMultiCityFlight(){
  wrap.appendChild(row);
 }
 async function sendSearch(event){
- event.preventDefault();const form=event.currentTarget;const contactStep=document.getElementById("contactStep");
- if(!form.dataset.contactReady){if(!form.querySelector("#serviceFields").reportValidity())return;form.dataset.contactReady="yes";contactStep.style.display="grid";document.getElementById("searchPhone").required=true;document.getElementById("searchSubmit").textContent="Send Request →";setFeedback("searchFeedback","Search details ready. Ab representative ke callback ke liye apna WhatsApp number dein.");contactStep.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
- if(!form.reportValidity())return;
- const phone=document.getElementById("searchPhone").value.trim();
- const values=[...form.querySelectorAll("#serviceFields input,#serviceFields select")].filter(e=>e.value).map(e=>e.previousElementSibling.textContent+": "+e.value);
+ event.preventDefault();const form=event.currentTarget;
+ const fields=form.querySelector("#serviceFields");
+ if(!fields.reportValidity())return;
+ const values=[...fields.querySelectorAll("input,select")].filter(e=>e.value).map(e=>((e.closest(".field")?.querySelector("label")?.textContent)||e.id)+": "+e.value);
  const details=selectedService+" enquiry\n"+values.join("\n")+(selectedService==="Flights"?"\nTrip type: "+document.getElementById("tripType").value:"");
  const mapped=selectedService==="Flights"?"Flights":selectedService==="Hotels"?"Hotels":selectedService==="Umrah"?"Umrah":selectedService==="Visa"?"Visa":"Other";
- const w=window.open("about:blank","_blank");setSubmitting("searchSubmit",true,"Saving enquiry…");setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
- try{await saveWebsiteEnquiry({customer_name:null,phone:phone,service_type:mapped,travel_date:form.querySelector('input[type="date"]')?.value||null,message:details});if(w)w.location.href=whatsappUrl("DunyaTrip "+selectedService+" Enquiry\nWhatsApp: "+phone+"\n"+details);setFeedback("searchFeedback",w?"Request receive ho gayi! Hamara representative 10 minutes ke andar aap se rabta karega. WhatsApp message bhi open ho raha hai.":"Request receive ho gayi! Hamara representative 10 minutes ke andar aap se rabta karega.");form.reset();}
- catch(error){if(w)w.close();setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);}
- finally{setSubmitting("searchSubmit",false,"Send Request →");}
+ setSubmitting("searchSubmit",true,"Sending request…");setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
+ try{await saveWebsiteEnquiry({customer_name:null,phone:null,service_type:mapped,travel_date:fields.querySelector('input[type="date"]')?.value||null,message:details});setFeedback("searchFeedback","Request receive ho gayi! Hamara representative 10 minutes ke andar aap se rabta karega.");form.reset();selectService(document.querySelector('.service-tab.active'),selectedService);}
+ catch(error){setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);}
+ finally{setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Continue →");}
 }
 async function sendContact(event){
  event.preventDefault();
@@ -378,3 +377,32 @@ const initialServiceTab=document.querySelector(".service-tab.active")||document.
 </script>
 </body>
 </html>
+
+/* Layout repair: flight rows occupy the full booking-card width */
+#serviceFields.flight-fields{display:block!important;width:100%;min-width:0}
+#serviceFields.flight-fields>.flight-route-row,
+#serviceFields.flight-fields>#multiCitySegments,
+#serviceFields.flight-fields>.flight-options-row{width:100%;max-width:none;min-width:0}
+#serviceFields.flight-fields>.flight-route-row{margin:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(4,minmax(0,1fr))}
+#serviceFields.flight-fields>.flight-options-row{display:grid;grid-template-columns:1.15fr 1fr 1.15fr;gap:12px;margin-top:12px}
+#serviceFields.flight-fields .field{min-width:0}
+#serviceFields.flight-fields .field input,
+#serviceFields.flight-fields .field select{width:100%;min-width:0}
+#serviceFields.flight-fields>.multi-flight,
+#serviceFields.flight-fields #multiCitySegments>.multi-flight{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 10px}
+#serviceFields.flight-fields .add-flight-button{margin-top:2px}
+#contactStep{display:none!important}
+@media(max-width:760px){
+ #serviceFields.flight-fields>.flight-route-row,
+ #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #serviceFields.flight-fields>.flight-options-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+}
+@media(max-width:520px){
+ #serviceFields.flight-fields>.flight-route-row,
+ #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:1fr}
+ #serviceFields.flight-fields>.flight-options-row{grid-template-columns:1fr 1fr}
+ #serviceFields.flight-fields .payment-option{grid-column:1/-1}
+ #serviceFields.flight-fields>.multi-flight,
+ #serviceFields.flight-fields #multiCitySegments>.multi-flight{grid-template-columns:1fr 1fr}
+}
