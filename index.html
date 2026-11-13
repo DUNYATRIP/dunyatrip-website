@@ -370,7 +370,7 @@ function removeMultiCityFlight(){
  if(rows.length<=2)return;
  rows[rows.length-1].remove();
 }
-async async function sendSearch(event){
+async function sendSearch(event){
  event.preventDefault();
  const form=event.currentTarget;
  const fields=form.querySelector("#serviceFields");
