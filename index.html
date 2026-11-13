@@ -128,6 +128,36 @@ footer a{display:block;margin:7px 0}
 .add-flight-button{border:0;background:#E5F8ED;color:#008653;padding:8px 13px;border-radius:8px;font-weight:800;cursor:pointer;margin:0 0 4px}
 @media(max-width:700px){.fields.flight-route-row,.fields.flight-route-row.round-route{grid-template-columns:repeat(2,minmax(0,1fr))}.fields.flight-options-row{grid-template-columns:repeat(3,minmax(0,1fr))}.multi-flight{grid-template-columns:1fr 1fr}.multi-flight .field:last-child{grid-column:1/-1}}
 @media(max-width:460px){.fields.flight-route-row,.fields.flight-route-row.round-route{grid-template-columns:1fr 1fr}.fields.flight-options-row{grid-template-columns:1fr 1fr}.payment-option{grid-column:1/-1}.multi-flight{grid-template-columns:1fr 1fr}}
+
+/* Layout repair: flight rows occupy the full booking-card width */
+#serviceFields.flight-fields{display:block!important;width:100%;min-width:0}
+#serviceFields.flight-fields>.flight-route-row,
+#serviceFields.flight-fields>#multiCitySegments,
+#serviceFields.flight-fields>.flight-options-row{width:100%;max-width:none;min-width:0}
+#serviceFields.flight-fields>.flight-route-row{margin:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(4,minmax(0,1fr))}
+#serviceFields.flight-fields>.flight-options-row{display:grid;grid-template-columns:1.15fr 1fr 1.15fr;gap:12px;margin-top:12px}
+#serviceFields.flight-fields .field{min-width:0}
+#serviceFields.flight-fields .field input,
+#serviceFields.flight-fields .field select{width:100%;min-width:0}
+#serviceFields.flight-fields>.multi-flight,
+#serviceFields.flight-fields #multiCitySegments>.multi-flight{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 10px}
+#serviceFields.flight-fields .add-flight-button{margin-top:2px}
+#contactStep{display:none!important}
+@media(max-width:760px){
+ #serviceFields.flight-fields>.flight-route-row,
+ #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #serviceFields.flight-fields>.flight-options-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+}
+@media(max-width:520px){
+ #serviceFields.flight-fields>.flight-route-row,
+ #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:1fr}
+ #serviceFields.flight-fields>.flight-options-row{grid-template-columns:1fr 1fr}
+ #serviceFields.flight-fields .payment-option{grid-column:1/-1}
+ #serviceFields.flight-fields>.multi-flight,
+ #serviceFields.flight-fields #multiCitySegments>.multi-flight{grid-template-columns:1fr 1fr}
+}
+
 </style>
 </head>
 <body>
@@ -377,32 +407,3 @@ const initialServiceTab=document.querySelector(".service-tab.active")||document.
 </script>
 </body>
 </html>
-
-/* Layout repair: flight rows occupy the full booking-card width */
-#serviceFields.flight-fields{display:block!important;width:100%;min-width:0}
-#serviceFields.flight-fields>.flight-route-row,
-#serviceFields.flight-fields>#multiCitySegments,
-#serviceFields.flight-fields>.flight-options-row{width:100%;max-width:none;min-width:0}
-#serviceFields.flight-fields>.flight-route-row{margin:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-#serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(4,minmax(0,1fr))}
-#serviceFields.flight-fields>.flight-options-row{display:grid;grid-template-columns:1.15fr 1fr 1.15fr;gap:12px;margin-top:12px}
-#serviceFields.flight-fields .field{min-width:0}
-#serviceFields.flight-fields .field input,
-#serviceFields.flight-fields .field select{width:100%;min-width:0}
-#serviceFields.flight-fields>.multi-flight,
-#serviceFields.flight-fields #multiCitySegments>.multi-flight{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 10px}
-#serviceFields.flight-fields .add-flight-button{margin-top:2px}
-#contactStep{display:none!important}
-@media(max-width:760px){
- #serviceFields.flight-fields>.flight-route-row,
- #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(2,minmax(0,1fr))}
- #serviceFields.flight-fields>.flight-options-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-}
-@media(max-width:520px){
- #serviceFields.flight-fields>.flight-route-row,
- #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:1fr}
- #serviceFields.flight-fields>.flight-options-row{grid-template-columns:1fr 1fr}
- #serviceFields.flight-fields .payment-option{grid-column:1/-1}
- #serviceFields.flight-fields>.multi-flight,
- #serviceFields.flight-fields #multiCitySegments>.multi-flight{grid-template-columns:1fr 1fr}
-}
