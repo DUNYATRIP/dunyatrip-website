@@ -143,7 +143,7 @@ footer a{display:block;margin:7px 0}
 #serviceFields.flight-fields>.multi-flight,
 #serviceFields.flight-fields #multiCitySegments>.multi-flight{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 10px}
 #serviceFields.flight-fields .add-flight-button{margin-top:2px}
-#contactStep{display:none!important}
+
 @media(max-width:760px){
  #serviceFields.flight-fields>.flight-route-row,
  #serviceFields.flight-fields>.flight-route-row.round-route{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -370,7 +370,7 @@ function removeMultiCityFlight(){
  if(rows.length<=2)return;
  rows[rows.length-1].remove();
 }
-async function sendSearch(event){
+async async function sendSearch(event){
  event.preventDefault();
  const form=event.currentTarget;
  const fields=form.querySelector("#serviceFields");
@@ -390,15 +390,18 @@ async function sendSearch(event){
  const values=[...fields.querySelectorAll("input,select")].filter(e=>e.value&&!e.disabled)
   .map(e=>((e.closest(".field")?.querySelector("label")?.textContent)||e.id||"Detail")+": "+e.value);
  const phone=phoneInput.value.trim();
- const tripType=selectedService==="Flights"?"\nTrip type: "+document.getElementById("tripType").value:"";
- const details=selectedService+" enquiry\nPassenger WhatsApp: "+phone+"\n"+values.join("\n")+tripType;
+ const tripType=selectedService==="Flights"?"\\nTrip type: "+document.getElementById("tripType").value:"";
+ const details=selectedService+" enquiry\\nPassenger WhatsApp: "+phone+"\\n"+values.join("\\n")+tripType;
  const mapped=selectedService==="Flights"?"Flights":selectedService==="Hotels"?"Hotels":selectedService==="Umrah"?"Umrah":selectedService==="Visa"?"Visa":"Other";
+ // Open the tab during the click gesture so the browser does not block it after the database request.
+ const waWindow=window.open("about:blank","_blank");
  setSubmitting("searchSubmit",true,"Sending request…");
  setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
  try{
   await saveWebsiteEnquiry({customer_name:null,phone:phone,service_type:mapped,travel_date:fields.querySelector('input[type="date"]')?.value||null,message:details});
-  const waWindow=window.open(whatsappUrl("DunyaTrip Enquiry\nWhatsApp: "+phone+"\n\n"+details+"\n\nPlease contact the customer within 10 minutes."),"_blank");
-  if(!waWindow)throw new Error("Enquiry save ho gayi, lekin WhatsApp pop-up block ho gaya. Please DunyaTrip WhatsApp par message bhejein.");
+  const url=whatsappUrl("DunyaTrip Enquiry\\nWhatsApp: "+phone+"\\n\\n"+details+"\\n\\nPlease contact the customer within 10 minutes.");
+  if(waWindow){waWindow.location.href=url;}
+  else{window.location.href=url;}
   setFeedback("searchFeedback","Request receive ho gayi! WhatsApp par Send press karein. Representative 10 minutes ke andar aapko contact karega.");
   form.reset();
   form.dataset.contactReady="";
@@ -406,6 +409,7 @@ async function sendSearch(event){
   phoneInput.required=false;
   selectService(document.querySelector('.service-tab.active'),selectedService);
  }catch(error){
+  if(waWindow)waWindow.close();
   setFeedback("searchFeedback",error.message||"Could not submit enquiry. Please try again.",true);
  }finally{
   setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Continue →");
