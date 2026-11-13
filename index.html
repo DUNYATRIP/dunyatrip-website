@@ -95,6 +95,13 @@ footer a{display:block;margin:7px 0}
  .footer-grid{grid-template-columns:1fr}
  .booking{padding:17px}
 }
+
+/* Multi-service booking bar inspired by the supplied reference layouts */
+.hero{padding:66px 0 92px}.hero h1{font-size:clamp(34px,4.8vw,54px);max-width:900px}.hero .hero-copy{max-width:760px}
+.service-shell{margin-top:-56px;position:relative;z-index:2}.service-tabs{display:flex;align-items:center;justify-content:center;gap:7px;padding:8px;background:#FFFFFF;border:1px solid #DCE9E1;border-radius:15px;box-shadow:0 8px 26px #18352B18;overflow-x:auto;scrollbar-width:thin}
+.service-tab{flex:0 0 auto;display:flex;align-items:center;gap:9px;border:1px solid #E5EEE8;background:#F7FAF8;color:#18352B;border-radius:11px;padding:11px 15px;font-weight:700;white-space:nowrap;cursor:pointer;transition:.18s}.service-tab .service-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:50%;background:#E5F8ED;color:#00A86B;font-size:18px}.service-tab.active{background:#E5F1FF;border-color:#00A86B;color:#18352B;box-shadow:inset 0 0 0 1px #00A86B}.service-tab.active .service-icon{background:#00A86B;color:#FFFFFF}
+.booking{margin-top:18px;padding:24px;border-radius:17px}.booking-top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:18px}.trip-types{display:flex;gap:8px;flex-wrap:wrap}.trip-type{border:0;background:#F2F6F3;color:#18352B;padding:9px 16px;border-radius:22px;font-weight:700;cursor:pointer}.trip-type.active{background:#00A86B;color:#FFFFFF}.fields.service-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.booking-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px}.booking-bottom .note{margin:0;max-width:650px}.booking-bottom .btn{min-width:180px}
+@media(max-width:800px){.service-tabs{justify-content:flex-start}.fields.service-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.hero{padding:52px 0 80px}.booking{padding:16px}.fields.service-fields{grid-template-columns:1fr}.service-tab{padding:8px 11px}.service-tab .service-icon{width:27px;height:27px}}
 </style>
 </head>
 <body>
@@ -112,37 +119,25 @@ footer a{display:block;margin:7px 0}
 </header>
 
 <main>
-<section class="hero">
- <div class="container">
-  <div class="eyebrow">Explore the world with DunyaTrip</div>
-  <h1>Your Journey.<br>Our World.</h1>
-  <p>Flights, hotels, visa assistance and Umrah services — let us help you plan your next journey with confidence.</p>
-  <div class="hero-actions">
-   <a class="btn gold" href="#flights">Explore Travel Services</a>
-   <a class="btn" href="#contact" style="background:#FFFFFF;color:#00A86B">Talk to Our Team</a>
-  </div>
+<section class="hero"><div class="container"><div class="eyebrow">Explore the world with DunyaTrip</div><h1>Book Flights, Hotels and Your Next Adventure</h1><p class="hero-copy">Your complete travel partner for flights, stays, car rentals, tours, Umrah and visa assistance — all in one place.</p></div></section>
+<div class="container service-shell" id="booking">
+ <div class="service-tabs" role="tablist" aria-label="Travel services">
+  <button class="service-tab active" type="button" onclick="selectService(this,'Flights')"><span class="service-icon">✈</span>Flights</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Hotels')"><span class="service-icon">▥</span>Hotels</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Cars')"><span class="service-icon">▰</span>Cars</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Tours')"><span class="service-icon">🌴</span>Tours</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Umrah')"><span class="service-icon">☪</span>Umrah</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Visa')"><span class="service-icon">▤</span>Visa</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Attractions')"><span class="service-icon">◎</span>Attractions</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Search Booking')"><span class="service-icon">⌕</span>Search Booking</button>
  </div>
-</section>
-
-<div class="container">
- <div class="booking" id="flights">
-  <div class="tabs">
-   <button class="tab active" onclick="setTab(this,'Flight enquiry')">✈ Flights</button>
-   <button class="tab" onclick="setTab(this,'Hotel enquiry')">▣ Hotels</button>
-   <button class="tab" onclick="setTab(this,'Travel enquiry')">＋ Travel help</button>
-  </div>
-  <form onsubmit="sendSearch(event)">
-   <input type="hidden" id="searchType" value="Flight enquiry">
-   <div class="fields">
-    <div class="field"><label>FROM</label><input id="from" placeholder="e.g. Islamabad" required></div>
-    <div class="field"><label>TO / DESTINATION</label><input id="to" placeholder="e.g. Dubai" required></div>
-    <div class="field"><label>DEPARTURE DATE</label><input id="date" type="date" required></div>
-    <div class="field"><label>TRAVELLERS</label><select id="travellers"><option>1 Traveller</option><option>2 Travellers</option><option>3 Travellers</option><option>4 Travellers</option><option>5+ Travellers</option></select></div>
-    <div class="field"><label>YOUR NAME</label><input id="searchName" placeholder="Enter your name" autocomplete="name" required></div>
-    <div class="field"><label>PHONE / WHATSAPP</label><input id="searchPhone" type="tel" placeholder="+92..." autocomplete="tel" required></div>
+ <div class="booking">
+  <div class="booking-top"><div class="trip-types" id="tripTypes"><button type="button" class="trip-type active" onclick="selectTripType(this,'One-way')">One-way</button><button type="button" class="trip-type" onclick="selectTripType(this,'Round-trip')">Round-trip</button><button type="button" class="trip-type" onclick="selectTripType(this,'Multi-city')">Multi-city</button></div><strong id="bookingHeading">Search flights</strong></div>
+  <form onsubmit="sendSearch(event)" id="serviceSearchForm"><input type="hidden" id="searchType" value="Flights"><input type="hidden" id="tripType" value="One-way">
+   <div class="fields service-fields" id="serviceFields">
+    <div class="field"><label>FROM</label><input id="from" placeholder="City or airport" required></div><div class="field"><label>TO</label><input id="to" placeholder="Where to?" required></div><div class="field"><label>DEPART</label><input id="date" type="date" required></div><div class="field"><label>TRAVELLERS</label><select id="travellers"><option>1 Adult</option><option>2 Adults</option><option>3 Adults</option><option>4 Adults</option><option>Family</option></select></div><div class="field"><label>YOUR NAME</label><input id="searchName" placeholder="Your name" required></div><div class="field"><label>PHONE / WHATSAPP</label><input id="searchPhone" type="tel" placeholder="+92..." required></div>
    </div>
-   <div class="search-row"><button class="btn" id="searchSubmit" type="submit">Send Enquiry →</button></div>
-   <p class="note" id="searchFeedback" role="status" aria-live="polite">This is an enquiry form, not a live booking or payment system. Your enquiry will be saved and WhatsApp will open for follow-up.</p>
+   <div class="booking-bottom"><p class="note" id="searchFeedback" role="status" aria-live="polite">Send your travel request and our team will follow up. This is an enquiry form, not a live booking or payment system.</p><button class="btn" id="searchSubmit" type="submit">Search Flights →</button></div>
   </form>
  </div>
 </div>
@@ -263,40 +258,36 @@ async function saveWebsiteEnquiry(enquiry){
   throw new Error(body.message||body.details||"We could not save your enquiry. Please try again or contact us on WhatsApp.");
  }
 }
-function setTab(button,type){
- document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
- button.classList.add("active");
- document.getElementById("searchType").value=type;
+let selectedService="Flights";
+function selectTripType(button,type){document.querySelectorAll(".trip-type").forEach(x=>x.classList.remove("active"));button.classList.add("active");document.getElementById("tripType").value=type;}
+function selectService(button,service){
+ selectedService=service;document.querySelectorAll(".service-tab").forEach(x=>x.classList.toggle("active",x===button));
+ document.getElementById("searchType").value=service;const fields=document.getElementById("serviceFields"),trip=document.getElementById("tripTypes");
+ const heading=document.getElementById("bookingHeading"),submit=document.getElementById("searchSubmit"),feedback=document.getElementById("searchFeedback");
+ trip.style.display=service==="Flights"?"flex":"none";
+ function input(label,id,placeholder,type,required){return '<div class="field"><label>'+label+'</label><input id="'+id+'" type="'+(type||"text")+'" placeholder="'+(placeholder||"")+'" '+(required===false?"":"required")+'></div>';}
+ function select(label,id,opts){return '<div class="field"><label>'+label+'</label><select id="'+id+'">'+opts.map(v=>'<option>'+v+'</option>').join("")+'</select></div>';}
+ let html="";
+ if(service==="Flights"){html=input("FROM","from","City or airport")+input("TO","to","Where to?")+input("DEPART","date","","date")+select("TRAVELLERS","travellers",["1 Adult","2 Adults","3 Adults","4 Adults","Family"])+select("CABIN CLASS","cabin",["Economy","Premium Economy","Business","First Class"]);heading.textContent="Search flights";feedback.textContent="Flight request will be sent to our travel team. Live fares and ticketing can be connected through the booking provider.";}
+ else if(service==="Hotels"){html=input("DESTINATION / CITY","destination","Where do you want to stay?")+input("CHECK-IN","checkin","","date")+input("CHECK-OUT","checkout","","date")+select("ROOMS","rooms",["1 Room","2 Rooms","3 Rooms","4+ Rooms"])+select("GUESTS","guests",["1 Guest","2 Guests","3 Guests","4 Guests","5+ Guests"]);heading.textContent="Find your hotel";feedback.textContent="Share your stay details and our team will help with hotel options and availability.";}
+ else if(service==="Cars"){html=input("PICK-UP LOCATION","pickup","City or airport")+input("DROP-OFF LOCATION","dropoff","Same as pick-up or another location")+input("PICK-UP DATE","pickupdate","","date")+input("RETURN DATE","cardate","","date")+select("CAR TYPE","cartype",["Any car","Economy","Sedan","SUV","Van"]);heading.textContent="Find a rental car";feedback.textContent="Send your car rental requirements for a quotation and availability check.";}
+ else if(service==="Tours"||service==="Attractions"){html=input("DESTINATION","destination","City or destination")+input("TRAVEL DATE","date","","date")+select("TRAVELLERS","travellers",["1 Person","2 People","3 People","4 People","5+ People"])+select("PREFERENCE","preference",service==="Tours"?["City tour","Family tour","Adventure","Private tour","Any"]:["Sightseeing","Theme park","Museum","Family attraction","Any"]);heading.textContent=service==="Tours"?"Explore tours":"Discover attractions";feedback.textContent="Tell us where and when you want to explore. Our team will share suitable options.";}
+ else if(service==="Umrah"){html=input("DEPARTURE CITY","from","Your city")+input("TRAVEL DATE","date","","date")+select("TRAVELLERS","travellers",["1 Person","2 People","3 People","4 People","Family / Group"])+select("PACKAGE TYPE","package",["Economy","Standard","Premium","Need guidance"]);heading.textContent="Plan your Umrah journey";feedback.textContent="Ask about Umrah packages, hotels, transport and travel arrangements.";}
+ else if(service==="Visa"){html=input("DESTINATION COUNTRY","destination","Which country?")+select("VISA TYPE","visatype",["Visit Visa","Tourist Visa","Business Visa","Family Visit","Need guidance"])+input("EXPECTED TRAVEL DATE","date","","date",false)+select("ASSISTANCE REQUIRED","assistance",["Visa guidance","File preparation","Document checklist","Embassy appointment assistance"]);heading.textContent="Visa assistance";feedback.textContent="We provide visa guidance and document preparation support. Visa decisions remain with the relevant embassy.";}
+ else{html=input("BOOKING REFERENCE","reference","Enter your booking reference")+input("PHONE / EMAIL","contactdetail","Phone or email");heading.textContent="Find your booking";feedback.textContent="Enter your reference and contact detail for help locating an existing booking.";}
+ html+=input("YOUR NAME","searchName","Your name")+input("PHONE / WHATSAPP","searchPhone","+92...");
+ fields.innerHTML=html;submit.textContent=service==="Flights"?"Search Flights →":service==="Hotels"?"Search Hotels →":service==="Cars"?"Search Cars →":service==="Tours"?"Find Tours →":service==="Umrah"?"Umrah Enquiry →":service==="Visa"?"Visa Enquiry →":service==="Attractions"?"Find Attractions →":"Search Booking →";
 }
 async function sendSearch(event){
- event.preventDefault();
- const form=event.currentTarget;
- if(!form.reportValidity()) return;
- const name=document.getElementById("searchName").value.trim();
- const phone=document.getElementById("searchPhone").value.trim();
- const from=document.getElementById("from").value.trim();
- const destination=document.getElementById("to").value.trim();
- const date=document.getElementById("date").value;
- const travellers=document.getElementById("travellers").value;
- const enquiryType=document.getElementById("searchType").value;
- const serviceType=enquiryType==="Flight enquiry"?"Flights":enquiryType==="Hotel enquiry"?"Hotels":"Other";
- const details=enquiryType+"\nFrom: "+from+"\nDestination: "+destination+"\nDeparture date: "+date+"\nTravellers: "+travellers;
- const whatsappMessage="DunyaTrip "+enquiryType+"\nName: "+name+"\nPhone: "+phone+"\n"+details;
- const whatsappWindow=window.open("about:blank","_blank");
- setSubmitting("searchSubmit",true,"Send Enquiry →");
- setFeedback("searchFeedback","Saving your enquiry…");
- try{
-  await saveWebsiteEnquiry({customer_name:name,phone:phone,service_type:serviceType,travel_date:date,message:details});
-  if(whatsappWindow){whatsappWindow.location.href=whatsappUrl(whatsappMessage);}
-  else{setFeedback("searchFeedback","Enquiry saved! Your browser blocked the WhatsApp pop-up. Please open WhatsApp using the contact link.");}
-  if(whatsappWindow) setFeedback("searchFeedback","Enquiry saved successfully. Opening WhatsApp…");
-  form.reset();
- }catch(error){
-  if(whatsappWindow) whatsappWindow.close();
-  setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);
- }finally{
-  setSubmitting("searchSubmit",false,"Send Enquiry →");
- }
+ event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;
+ const name=document.getElementById("searchName").value.trim(),phone=document.getElementById("searchPhone").value.trim();
+ const values=[...form.querySelectorAll("#serviceFields input:not(#searchName):not(#searchPhone),#serviceFields select")].filter(e=>e.value).map(e=>e.previousElementSibling.textContent+": "+e.value);
+ const details=selectedService+" enquiry\n"+values.join("\n")+(selectedService==="Flights"?"\nTrip type: "+document.getElementById("tripType").value:"");
+ const mapped=selectedService==="Flights"?"Flights":selectedService==="Hotels"?"Hotels":selectedService==="Umrah"?"Umrah":selectedService==="Visa"?"Visa":"Other";
+ const w=window.open("about:blank","_blank");setSubmitting("searchSubmit",true,"Saving enquiry…");setFeedback("searchFeedback","Saving your enquiry…");
+ try{await saveWebsiteEnquiry({customer_name:name,phone:phone,service_type:mapped,travel_date:form.querySelector('input[type="date"]')?.value||null,message:details});if(w)w.location.href=whatsappUrl("DunyaTrip "+selectedService+" Enquiry\nName: "+name+"\nPhone: "+phone+"\n"+details);setFeedback("searchFeedback",w?"Enquiry saved successfully. Opening WhatsApp…":"Enquiry saved! Please contact us on WhatsApp for follow-up.");form.reset();}
+ catch(error){if(w)w.close();setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);}
+ finally{setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Send Enquiry →");}
 }
 async function sendContact(event){
  event.preventDefault();
