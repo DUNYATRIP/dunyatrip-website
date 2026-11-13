@@ -109,20 +109,32 @@ footer a{display:block;margin:7px 0}
 .service-tab .service-icon{width:25px;height:25px;flex:0 0 25px;font-size:15px}
 @media(max-width:900px){.service-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.service-tab{width:100%;padding:7px 3px;font-size:11px}}
 @media(max-width:520px){.service-tabs{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:6px}.service-tab{flex-direction:column;gap:3px;padding:6px 2px;font-size:10px}.service-tab .service-icon{width:23px;height:23px;flex-basis:23px;font-size:14px}}
+
+.site-header{height:auto;display:block;position:sticky;top:0;z-index:30;background:#fff}.utility-bar{background:#18352B;color:#fff;font-size:12px}.utility-inner{min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:14px}.business-link{display:flex;align-items:center;gap:8px;color:#fff;white-space:nowrap}.business-link strong{font-size:14px}.business-link span{color:#D7E9DF}.utility-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px}.whatsapp-link{color:#DDF8EA;font-weight:700;white-space:nowrap}.utility-select{display:flex;align-items:center;gap:4px;color:#fff}.utility-select select{border:0;background:transparent;color:#fff;font-size:12px;font-weight:700;cursor:pointer;outline:none;max-width:116px}.utility-select option{color:#18352B;background:#fff}.sign-in-link{background:#00A86B;color:#fff;padding:6px 15px;border-radius:7px;font-weight:800;white-space:nowrap}.main-nav{height:70px;background:#fff;display:flex;align-items:center}.main-nav .nav{width:100%}@media(max-width:800px){.utility-inner{padding-top:6px;padding-bottom:6px;flex-wrap:wrap;justify-content:center;gap:7px 14px}.utility-actions{gap:10px;flex-wrap:wrap;justify-content:center}.business-link{margin-right:auto}.main-nav{height:66px}.main-nav .links{top:108px}}@media(max-width:520px){.utility-inner{width:96%;gap:5px}.business-link strong{font-size:12px}.business-link span{font-size:10px}.utility-actions{width:100%;justify-content:space-between;gap:6px}.whatsapp-link{font-size:11px}.utility-select select{font-size:11px;max-width:78px}.sign-in-link{padding:5px 10px;font-size:11px}.main-nav .links{top:130px}}
 </style>
 </head>
 <body>
-<header>
- <div class="container nav">
+<header class="site-header">
+ <div class="utility-bar"><div class="container utility-inner">
+  <a class="business-link" href="#b2b">DunyaTrip <span>for Business Travel</span></a>
+  <div class="utility-actions">
+   <a class="whatsapp-link" href="https://wa.me/923071201353" target="_blank" rel="noopener">0307 1201353</a>
+   <label><select id="countrySelect" aria-label="Country" onchange="updateCountry(this.value)"><option value="PK">Pakistan</option><option value="AE">UAE</option><option value="SA">Saudi Arabia</option><option value="GB">UK</option><option value="US">USA</option></select></label>
+   <label><select id="currencySelect" aria-label="Currency"><option>PKR</option><option>USD</option><option>AED</option><option>SAR</option><option>GBP</option></select></label>
+   <label><select id="languageSelect" aria-label="Language"><option value="EN">EN</option><option value="UR">اردو</option></select></label>
+   <a href="#contact">Support</a><a href="#booking">My Trips</a><a class="sign-in-link" href="#contact">Sign In</a>
+  </div>
+ </div></div>
+ <div class="main-nav"><div class="container nav">
   <a class="logo" href="#">Dunya<span>Trip</span>.</a>
   <nav class="links" id="navlinks">
-   <a href="#flights">Flights</a><a href="#hotels">Hotels</a>
-   <a href="#visa">Visa Assistance</a><a href="#umrah">Umrah</a>
+   <a href="#booking">Flights</a><a href="#booking" onclick="selectServiceByName('Hotels')">Hotels</a>
+   <a href="#booking" onclick="selectServiceByName('Visa')">Visa Assistance</a><a href="#booking" onclick="selectServiceByName('Umrah')">Umrah</a>
    <a href="#b2b">B2B Partners</a><a href="#contact">Contact</a>
   </nav>
-  <a class="btn" href="#contact">Plan Your Trip</a>
+  <a class="btn" href="#booking">Plan Your Trip</a>
   <button class="menu" onclick="document.getElementById('navlinks').classList.toggle('open')" aria-label="Open menu">☰</button>
- </div>
+ </div></div>
 </header>
 
 <main>
@@ -267,6 +279,7 @@ async function saveWebsiteEnquiry(enquiry){
   throw new Error(body.message||body.details||"We could not save your enquiry. Please try again or contact us on WhatsApp.");
  }
 }
+function updateCountry(country){const c=document.getElementById("currencySelect");const map={PK:"PKR",AE:"AED",SA:"SAR",GB:"GBP",US:"USD"};if(c)c.value=map[country]||"PKR";}function selectServiceByName(service){const b=[...document.querySelectorAll(".service-tab")].find(x=>x.textContent.trim().includes(service));if(b)selectService(b,service);}
 let selectedService="Flights";
 function selectTripType(button,type){document.querySelectorAll(".trip-type").forEach(x=>x.classList.remove("active"));button.classList.add("active");document.getElementById("tripType").value=type;}
 function selectService(button,service){
@@ -290,7 +303,7 @@ function selectService(button,service){
  html+=input("YOUR NAME","searchName","Your name")+input("PHONE / WHATSAPP","searchPhone","+92...");
  fields.innerHTML=html;submit.textContent=service==="Flights"?"Search Flights →":service==="Hotels"?"Search Hotels →":service==="Cars"?"Search Cars →":service==="Tours"?"Find Tours →":service==="Umrah"?"Umrah Enquiry →":service==="Visa"?"Visa Enquiry →":service==="Appointment Booking"?"Request Appointment →":service==="File Preparation"?"Request File Support →":service==="Insurance"?"Get Insurance Quote →":"Search Booking →";
 }
-async async function sendSearch(event){
+async function sendSearch(event){
  event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;
  const name=document.getElementById("searchName").value.trim(),phone=document.getElementById("searchPhone").value.trim();
  const values=[...form.querySelectorAll("#serviceFields input:not(#searchName):not(#searchPhone),#serviceFields select")].filter(e=>e.value).map(e=>e.previousElementSibling.textContent+": "+e.value);
