@@ -450,6 +450,7 @@ async function sendContact(event){
 }
 document.getElementById("year").textContent=new Date().getFullYear();
 const initialServiceTab=document.querySelector(".service-tab.active")||document.querySelector(".service-tab");if(initialServiceTab)selectService(initialServiceTab,"Flights");
+const requestedService=new URLSearchParams(window.location.search).get("service");if(requestedService){const serviceTab=[...document.querySelectorAll(".service-tab")].find(x=>x.textContent.trim().toLowerCase().includes(requestedService.toLowerCase()));if(serviceTab)selectService(serviceTab,requestedService);}
 </script>
 </body>
 </html>
