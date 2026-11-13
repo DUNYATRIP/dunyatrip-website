@@ -186,7 +186,7 @@ footer a{display:block;margin:7px 0}
   <form onsubmit="sendSearch(event)" id="serviceSearchForm"><input type="hidden" id="searchType" value="Flights"><input type="hidden" id="tripType" value="One-way">
    <div class="fields service-fields" id="serviceFields"></div>
    <div id="contactStep" class="fields service-fields" style="display:none;margin-top:16px"><div class="field"><label>WHATSAPP NUMBER</label><input id="searchPhone" type="tel" placeholder="+92 3XX XXXXXXX" autocomplete="tel" required></div></div>
-   <div class="booking-bottom"><p class="note" id="searchFeedback" role="status" aria-live="polite">Select your trip details and search. Our team can help confirm options and availability.</p><button class="btn" id="searchSubmit" type="submit">Search Flights →</button></div>
+   <div class="booking-bottom"><p class="note" id="searchFeedback" role="status" aria-live="polite">Select your trip details and search. Our team can help confirm options and availability.</p><button class="btn" id="searchSubmit" type="button" onclick="sendSearch(event)">Search Flights →</button></div>
   </form>
  </div>
 </div>
@@ -371,13 +371,14 @@ function removeMultiCityFlight(){
  rows[rows.length-1].remove();
 }
 async function sendSearch(event){
- event.preventDefault();
- const form=event.currentTarget;
+ if(event && typeof event.preventDefault==="function") event.preventDefault();
+ const form=document.getElementById("serviceSearchForm");
+ if(!form) return;
  const fields=form.querySelector("#serviceFields");
  const contactStep=document.getElementById("contactStep");
  const phoneInput=document.getElementById("searchPhone");
  if(form.dataset.contactReady!=="yes"){
-  if(!fields || !form.reportValidity())return;
+  if(!fields || !form.checkValidity()){form.reportValidity();return;}
   contactStep.style.display="grid";
   phoneInput.required=true;
   form.dataset.contactReady="yes";
@@ -415,6 +416,7 @@ async function sendSearch(event){
   setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Continue →");
  }
 }
+window.sendSearch=sendSearch;
 async function sendContact(event){
  event.preventDefault();
  const form=event.currentTarget;
