@@ -158,6 +158,10 @@ footer a{display:block;margin:7px 0}
  #serviceFields.flight-fields #multiCitySegments>.multi-flight{grid-template-columns:1fr 1fr}
 }
 
+
+.multi-city-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.remove-flight-button{border:1px solid #d7deea;background:#fff;color:#344054;border-radius:10px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
+.remove-flight-button:hover{background:#f4f6fa}
 </style>
 </head>
 <body>
@@ -330,10 +334,10 @@ const airportList='<datalist id="airportCities"><option value="Lahore (LHE) - Al
  if(trip==="One-way"){html=routeRow("from","to","date","DEPARTURE");}
  else if(trip==="Round-trip"){html='<div class="fields flight-route-row round-route">'+citySelect("FROM","from")+citySelect("TO","to")+input("DEPARTURE","date","","date")+input("RETURN","returnDate","","date")+'</div>';}
  else {
-  html='<div id="multiCitySegments">'+
+  html='<div id="multiCitySegments" data-next-segment="3">'+
    '<div class="multi-flight"><div class="multi-flight-title">FLIGHT 1</div>'+citySelect("FROM","from")+citySelect("TO","to")+input("DEPARTURE","date","","date")+'</div>'+
    '<div class="multi-flight"><div class="multi-flight-title">FLIGHT 2</div>'+citySelect("FROM","from2")+citySelect("TO","to2")+input("DEPARTURE","date2","","date")+'</div>'+
-   '</div><button type="button" class="add-flight-button" onclick="addMultiCityFlight()">＋ Add flight</button>';
+   '</div><div class="multi-city-actions"><button type="button" class="add-flight-button" onclick="addMultiCityFlight()">＋ Add flight</button><button type="button" class="remove-flight-button" onclick="removeMultiCityFlight()" aria-label="Remove last flight segment">− Remove flight</button></div>';
  }
  html+='<div class="fields flight-options-row">'+travellerPicker()+cabinPicker()+paymentInfo()+'</div>';
  heading.textContent="Search flights";
@@ -347,29 +351,65 @@ const airportList='<datalist id="airportCities"><option value="Lahore (LHE) - Al
  else if(service==="File Preparation"){html=select("FILE TYPE","fileType",["Visit Visa File","Tourist Visa File","Business Visa File","Family Visit Visa File","Umrah Documents","Other Travel Documents"])+input("DESTINATION COUNTRY","destination","Which country?")+input("TRAVEL DATE","date","","date",false)+select("ASSISTANCE REQUIRED","fileHelp",["Complete file preparation","Document checklist","Document review","Application form assistance"]);heading.textContent="Travel file preparation";feedback.textContent="Our team can guide you through document checklists and file preparation. Final requirements depend on the relevant authority.";}
  else if(service==="Insurance"){html=select("INSURANCE TYPE","insuranceType",["Travel Insurance","Schengen Travel Insurance","Family Travel Insurance","Group Travel Insurance","Other Insurance"])+input("DESTINATION","destination","Country / region")+input("TRAVEL START DATE","startDate","","date")+input("TRAVEL END DATE","endDate","","date")+select("TRAVELLERS","travellers",["1 Person","2 People","3 People","4 People","5+ People"]);heading.textContent="Travel insurance enquiry";feedback.textContent="Share your trip details and our team will help with suitable travel insurance options and quotations.";}
  else{html=input("BOOKING REFERENCE","reference","Enter your booking reference")+input("PHONE / EMAIL","contactdetail","Phone or email");heading.textContent="Find your booking";feedback.textContent="Enter your reference and contact detail for help locating an existing booking.";}
- fields.classList.toggle("flight-fields",service==="Flights");fields.innerHTML=html;document.getElementById("contactStep").style.display="none";document.getElementById("searchPhone").required=false;document.getElementById("serviceSearchForm").dataset.contactReady="";submit.textContent=service==="Flights"?"Search Flights →":service==="Hotels"?"Search Hotels →":service==="Cars"?"Search Cars →":service==="Tours"?"Search Tours →":service==="Umrah"?"Continue →":service==="Visa"?"Continue →":service==="Appointment Booking"?"Continue →":service==="File Preparation"?"Continue →":service==="Insurance"?"Continue →":"Continue →";
+ fields.classList.toggle("flight-fields",service==="Flights");fields.innerHTML=html;document.getElementById("contactStep").style.display="none";document.getElementById("searchPhone").required=false;document.getElementById("searchPhone").value="";document.getElementById("serviceSearchForm").dataset.contactReady="";submit.textContent=service==="Flights"?"Search Flights →":service==="Hotels"?"Search Hotels →":service==="Cars"?"Search Cars →":service==="Tours"?"Search Tours →":service==="Umrah"?"Continue →":service==="Visa"?"Continue →":service==="Appointment Booking"?"Continue →":service==="File Preparation"?"Continue →":service==="Insurance"?"Continue →":"Continue →";
 }
 
 function addMultiCityFlight(){
  const wrap=document.getElementById("multiCitySegments");if(!wrap)return;
- const n=wrap.querySelectorAll(".multi-flight").length+1;
+ const n=Number(wrap.dataset.nextSegment||3);
+ wrap.dataset.nextSegment=String(n+1);
  const cities=[["Lahore (LHE)","Lahore (LHE) - Allama Iqbal International"],["Islamabad (ISB)","Islamabad (ISB) - Islamabad International"],["Karachi (KHI)","Karachi (KHI) - Jinnah International"],["Peshawar (PEW)","Peshawar (PEW) - Bacha Khan International"],["Quetta (UET)","Quetta (UET) - Quetta International"],["Multan (MUX)","Multan (MUX) - Multan International"],["Sialkot (SKT)","Sialkot (SKT) - Sialkot International"],["Faisalabad (LYP)","Faisalabad (LYP) - Faisalabad International"],["Dubai (DXB)","Dubai (DXB) - Dubai International"],["Jeddah (JED)","Jeddah (JED) - King Abdulaziz International"],["Riyadh (RUH)","Riyadh (RUH) - King Khalid International"],["Doha (DOH)","Doha (DOH) - Hamad International"],["Istanbul (IST)","Istanbul (IST) - Istanbul Airport"],["London (LHR)","London (LHR) - Heathrow"]];
  const options='<option value="">Select city / airport</option>'+cities.map(c=>'<option value="'+c[1]+'">'+c[0]+'</option>').join("");
  const row=document.createElement("div");row.className="multi-flight";
  row.innerHTML='<div class="multi-flight-title">FLIGHT '+n+'</div><div class="field"><label>FROM</label><select id="from'+n+'" required>'+options+'</select></div><div class="field"><label>TO</label><select id="to'+n+'" required>'+options+'</select></div><div class="field"><label>DEPARTURE</label><input id="date'+n+'" type="date" required></div>';
  wrap.appendChild(row);
 }
+function removeMultiCityFlight(){
+ const wrap=document.getElementById("multiCitySegments");if(!wrap)return;
+ const rows=wrap.querySelectorAll(".multi-flight");
+ if(rows.length<=2)return;
+ rows[rows.length-1].remove();
+}
 async function sendSearch(event){
- event.preventDefault();const form=event.currentTarget;
+ event.preventDefault();
+ const form=event.currentTarget;
  const fields=form.querySelector("#serviceFields");
- if(!fields.reportValidity())return;
- const values=[...fields.querySelectorAll("input,select")].filter(e=>e.value).map(e=>((e.closest(".field")?.querySelector("label")?.textContent)||e.id)+": "+e.value);
- const details=selectedService+" enquiry\n"+values.join("\n")+(selectedService==="Flights"?"\nTrip type: "+document.getElementById("tripType").value:"");
+ const contactStep=document.getElementById("contactStep");
+ const phoneInput=document.getElementById("searchPhone");
+ if(form.dataset.contactReady!=="yes"){
+  if(!fields || !fields.reportValidity())return;
+  contactStep.style.display="grid";
+  phoneInput.required=true;
+  form.dataset.contactReady="yes";
+  setFeedback("searchFeedback","Apna WhatsApp number enter karein. Hamara representative isi number par 10 minutes ke andar contact karega.");
+  setSubmitting("searchSubmit",false,"Submit Enquiry →");
+  phoneInput.focus();
+  return;
+ }
+ if(!phoneInput.value.trim()){phoneInput.reportValidity();return;}
+ const values=[...fields.querySelectorAll("input,select")].filter(e=>e.value&&!e.disabled)
+  .map(e=>((e.closest(".field")?.querySelector("label")?.textContent)||e.id||"Detail")+": "+e.value);
+ const phone=phoneInput.value.trim();
+ const tripType=selectedService==="Flights"?"\nTrip type: "+document.getElementById("tripType").value:"";
+ const details=selectedService+" enquiry\nPassenger WhatsApp: "+phone+"\n"+values.join("\n")+tripType;
  const mapped=selectedService==="Flights"?"Flights":selectedService==="Hotels"?"Hotels":selectedService==="Umrah"?"Umrah":selectedService==="Visa"?"Visa":"Other";
- setSubmitting("searchSubmit",true,"Sending request…");setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
- try{await saveWebsiteEnquiry({customer_name:null,phone:null,service_type:mapped,travel_date:fields.querySelector('input[type="date"]')?.value||null,message:details});setFeedback("searchFeedback","Request receive ho gayi! Hamara representative 10 minutes ke andar aap se rabta karega.");form.reset();selectService(document.querySelector('.service-tab.active'),selectedService);}
- catch(error){setFeedback("searchFeedback",error.message||"Could not save enquiry. Please try again.",true);}
- finally{setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Continue →");}
+ setSubmitting("searchSubmit",true,"Sending request…");
+ setFeedback("searchFeedback","Aapki request submit ho rahi hai…");
+ try{
+  await saveWebsiteEnquiry({customer_name:null,phone:phone,service_type:mapped,travel_date:fields.querySelector('input[type="date"]')?.value||null,message:details});
+  const waWindow=window.open(whatsappUrl("DunyaTrip Enquiry\nWhatsApp: "+phone+"\n\n"+details+"\n\nPlease contact the customer within 10 minutes."),"_blank");
+  if(!waWindow)throw new Error("Enquiry save ho gayi, lekin WhatsApp pop-up block ho gaya. Please DunyaTrip WhatsApp par message bhejein.");
+  setFeedback("searchFeedback","Request receive ho gayi! WhatsApp par Send press karein. Representative 10 minutes ke andar aapko contact karega.");
+  form.reset();
+  form.dataset.contactReady="";
+  contactStep.style.display="none";
+  phoneInput.required=false;
+  selectService(document.querySelector('.service-tab.active'),selectedService);
+ }catch(error){
+  setFeedback("searchFeedback",error.message||"Could not submit enquiry. Please try again.",true);
+ }finally{
+  setSubmitting("searchSubmit",false,selectedService==="Flights"?"Search Flights →":"Continue →");
+ }
 }
 async function sendContact(event){
  event.preventDefault();
