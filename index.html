@@ -403,12 +403,12 @@ async function sendSearch(event){
   const url=whatsappUrl("DunyaTrip Enquiry\\nWhatsApp: "+phone+"\\n\\n"+details+"\\n\\nPlease contact the customer within 10 minutes.");
   if(waWindow){waWindow.location.href=url;}
   else{window.location.href=url;}
-  setFeedback("searchFeedback","Thank you! Aapki enquiry receive ho gayi hai. DunyaTrip team aapko diye gaye WhatsApp number par 10 minutes ke andar contact karegi.");
   form.reset();
   form.dataset.contactReady="";
   contactStep.style.display="none";
   phoneInput.required=false;
   selectService(document.querySelector('.service-tab.active'),selectedService);
+  setFeedback("searchFeedback","Thank you! Aapki enquiry receive ho gayi hai. DunyaTrip team aapko WhatsApp par 10 minutes ke andar khud contact karegi.");
  }catch(error){
   if(waWindow)waWindow.close();
   setFeedback("searchFeedback",error.message||"Could not submit enquiry. Please try again.",true);
