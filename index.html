@@ -295,7 +295,7 @@ const airportList='<datalist id="airportCities"><option value="Lahore (LHE) - Al
  if(service==="Flights"){
  const trip=document.getElementById("tripType").value;
  const cabinPicker=()=>'<div class="field compact-option"><label>CABIN CLASS</label><select id="cabin" aria-label="Cabin class"><option>Economy</option><option>Premium Economy</option><option>Business</option><option>First Class</option></select></div>';
- const paymentInfo=()=>'<div class="field compact-option payment-option"><label>PAYMENT</label><div class="payment-summary"><strong>5 Payment Types</strong><small>Flexible payment options</small></div></div>';
+ const paymentInfo=()=>'<div class="field compact-option payment-option"><label>PAYMENT TYPE</label><select id="paymentType" aria-label="Preferred payment type"><option value="Any / discuss with agent">Any / discuss with agent</option><option>Bank transfer</option><option>Debit / credit card</option><option>JazzCash</option><option>Easypaisa</option><option>Cash</option></select></div>';
  const routeRow=(fromId,toId,dateId,dateLabel)=>'<div class="fields flight-route-row">'+citySelect("FROM",fromId)+citySelect("TO",toId)+input(dateLabel,dateId,"","date")+'</div>';
  if(trip==="One-way"){html=routeRow("from","to","date","DEPARTURE");}
  else if(trip==="Round-trip"){html='<div class="fields flight-route-row round-route">'+citySelect("FROM","from")+citySelect("TO","to")+input("DEPARTURE","date","","date")+input("RETURN","returnDate","","date")+'</div>';}
