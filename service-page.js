@@ -98,10 +98,10 @@
   const waWindow=window.open("about:blank","_blank");
   submit.disabled=true;submit.textContent="Sending…";feedback.textContent="Aapki enquiry submit ho rahi hai…";
   try{
-   const cfg=window.DUNYATRIP_SUPABASE_CONFIG||{},url=cfg.url||"",key=cfg.anonKey||"";
-   if(!url.startsWith("https://")||!key)throw new Error("Enquiry saving is not configured. Please contact us on WhatsApp.");
+   const cfg=window.DUNYATRIP_SUPABASE_CONFIG||{},url=cfg.url||"",anonKey=cfg.anonKey||"";
+   if(!url.startsWith("https://")||!anonKey)throw new Error("Enquiry saving is not configured. Please contact us on WhatsApp.");
    const firstDate=host.querySelector('input[type="date"]');
-   const response=await fetch(url.replace(/\/$/,"")+"/rest/v1/enquiries",{method:"POST",headers:{apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({customer_name:"Website visitor",phone:phone.value.trim(),service_type:key==="cars"?"Other":key==="tours"?"Other":key==="umrah"?"Umrah":key==="visa"?"Visa":key==="appointments"?"Visa":key==="file-preparation"?"Visa":"Other",travel_date:firstDate?.value||null,message:details})});
+   const response=await fetch(url.replace(/\/$/,"")+"/rest/v1/enquiries",{method:"POST",headers:{apikey:anonKey,Authorization:"Bearer "+anonKey,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({customer_name:"Website visitor",phone:phone.value.trim(),service_type:document.body.dataset.service==="umrah"?"Umrah":(["visa","appointments","file-preparation"].includes(document.body.dataset.service)?"Visa":"Other"),travel_date:firstDate?.value||null,message:details})});
    if(!response.ok){const err=await response.json().catch(()=>({}));throw new Error(err.message||err.details||"Could not save your enquiry. Please try again.");}
    if(waWindow)waWindow.location.href=whatsapp;else window.location.href=whatsapp;
    feedback.textContent="Thank you! Your enquiry has been saved. Our team will contact you.";
