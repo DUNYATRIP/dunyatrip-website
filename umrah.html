@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Umrah Packages with DunyaTrip. Request travel services and assistance from Pakistan.">
+<title>Umrah Packages | DunyaTrip</title>
+<link rel="stylesheet" href="service-common.css">
+</head>
+<body data-service="umrah">
+<header class="site-header">
+ <div class="container ota-header">
+  <a class="logo" href="index.html">Dunya<span>Trip</span>.</a>
+  <div class="ota-actions">
+   <a class="whatsapp-link" href="https://wa.me/923071201353" target="_blank" rel="noopener">WhatsApp</a>
+   <select id="countrySelect" aria-label="Country"><option value="PK">PK</option><option value="AE">UAE</option><option value="SA">KSA</option><option value="GB">UK</option><option value="US">US</option></select>
+   <select id="currencySelect" aria-label="Currency"><option>PKR</option><option>USD</option><option>AED</option><option>SAR</option><option>GBP</option></select>
+   <select id="languageSelect" aria-label="Language"><option>EN</option><option>اردو</option></select>
+   <a href="index.html#contact">Support</a>
+   <a href="index.html#booking" style="font-weight:800;color:#008653">Book as Guest</a>
+   <a class="sign-in-link" href="sign-in.html">Log In</a>
+  </div>
+ </div>
+ <nav class="container service-nav" aria-label="DunyaTrip services"><a href="index.html?service=Flights#booking" >Flights</a><a href="hotels.html" >Hotels</a><a href="cars.html" >Cars</a><a href="tours.html" >Tours</a><a href="umrah.html" class="active" aria-current="page">Umrah</a><a href="visa.html" >Visa</a><a href="appointments.html" >Appointments</a><a href="file-preparation.html" >File Prep</a><a href="insurance.html" >Insurance</a><a href="partner.html" >B2B</a></nav>
+</header>
+<main>
+ <section class="hero"><div class="container">
+  <div class="eyebrow" id="serviceEyebrow">Umrah Packages</div>
+  <h1 id="serviceHeadline">Umrah Packages with DunyaTrip</h1>
+  <p id="serviceIntro">Tell us what you need and our team will help you with the next steps.</p>
+ </div></section>
+ <section class="container">
+  <div class="booking">
+   <div class="booking-head"><div><h2 id="serviceCardTitle">Umrah Packages enquiry</h2><p id="serviceCardIntro">Share your requirements and our team will contact you.</p></div><span aria-hidden="true" style="font-size:26px">☪</span></div>
+   <form id="serviceForm" novalidate>
+    <div class="fields" id="serviceFields"></div>
+    <div class="contact-step" id="contactStep" hidden>
+     <div class="field"><label for="customerPhone">YOUR WHATSAPP NUMBER</label><input id="customerPhone" type="tel" placeholder="+92 3XX XXXXXXX" autocomplete="tel"></div>
+     <button class="btn" id="serviceSubmit" type="submit">Submit Enquiry →</button>
+    </div>
+    <div class="booking-bottom">
+     <p class="note feedback" id="serviceFeedback" role="status" aria-live="polite">Submit your requirements and our team will contact you.</p>
+     <button class="btn" id="serviceSubmit" type="submit">Continue →</button>
+    </div>
+   </form>
+  </div>
+ </section>
+ <section class="info"><div class="container info-grid">
+  <article class="info-card"><strong>Personal assistance</strong><p>Our team reviews your request and contacts you to discuss suitable next steps.</p></article>
+  <article class="info-card"><strong>Clear requirements</strong><p>Share the details you know. We can help clarify the remaining requirements with you.</p></article>
+  <article class="info-card"><strong>Human support</strong><p>Need help now? <a href="https://wa.me/923071201353" target="_blank" rel="noopener" style="color:#008653;font-weight:800">Chat with DunyaTrip on WhatsApp</a>.</p></article>
+ </div></section>
+</main>
+<footer><div class="container">© <span id="currentYear"></span> DunyaTrip. Your Journey, Our World.</div></footer>
+<script src="supabase-config.js"></script>
+<script src="service-page.js"></script>
+</body></html>
