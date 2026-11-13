@@ -377,7 +377,7 @@ async function sendSearch(event){
  const contactStep=document.getElementById("contactStep");
  const phoneInput=document.getElementById("searchPhone");
  if(form.dataset.contactReady!=="yes"){
-  if(!fields || !fields.reportValidity())return;
+  if(!fields || !form.reportValidity())return;
   contactStep.style.display="grid";
   phoneInput.required=true;
   form.dataset.contactReady="yes";
