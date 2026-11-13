@@ -102,6 +102,13 @@ footer a{display:block;margin:7px 0}
 .service-tab{flex:0 0 auto;display:flex;align-items:center;gap:9px;border:1px solid #E5EEE8;background:#F7FAF8;color:#18352B;border-radius:11px;padding:11px 15px;font-weight:700;white-space:nowrap;cursor:pointer;transition:.18s}.service-tab .service-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:50%;background:#E5F8ED;color:#00A86B;font-size:18px}.service-tab.active{background:#E5F1FF;border-color:#00A86B;color:#18352B;box-shadow:inset 0 0 0 1px #00A86B}.service-tab.active .service-icon{background:#00A86B;color:#FFFFFF}
 .booking{margin-top:18px;padding:24px;border-radius:17px}.booking-top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:18px}.trip-types{display:flex;gap:8px;flex-wrap:wrap}.trip-type{border:0;background:#F2F6F3;color:#18352B;padding:9px 16px;border-radius:22px;font-weight:700;cursor:pointer}.trip-type.active{background:#00A86B;color:#FFFFFF}.fields.service-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.booking-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px}.booking-bottom .note{margin:0;max-width:650px}.booking-bottom .btn{min-width:180px}
 @media(max-width:800px){.service-tabs{justify-content:flex-start}.fields.service-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.hero{padding:52px 0 80px}.booking{padding:16px}.fields.service-fields{grid-template-columns:1fr}.service-tab{padding:8px 11px}.service-tab .service-icon{width:27px;height:27px}}
+
+/* Compact, non-scrolling service navigation */
+.service-tabs{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:7px;overflow:visible;scrollbar-width:none}
+.service-tab{flex:1 1 0;min-width:0;justify-content:center;gap:5px;padding:7px 6px;border-radius:9px;font-size:12px;line-height:1.15;white-space:nowrap}
+.service-tab .service-icon{width:25px;height:25px;flex:0 0 25px;font-size:15px}
+@media(max-width:900px){.service-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.service-tab{width:100%;padding:7px 3px;font-size:11px}}
+@media(max-width:520px){.service-tabs{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:6px}.service-tab{flex-direction:column;gap:3px;padding:6px 2px;font-size:10px}.service-tab .service-icon{width:23px;height:23px;flex-basis:23px;font-size:14px}}
 </style>
 </head>
 <body>
@@ -128,9 +135,9 @@ footer a{display:block;margin:7px 0}
   <button class="service-tab" type="button" onclick="selectService(this,'Tours')"><span class="service-icon">🌴</span>Tours</button>
   <button class="service-tab" type="button" onclick="selectService(this,'Umrah')"><span class="service-icon">☪</span>Umrah</button>
   <button class="service-tab" type="button" onclick="selectService(this,'Visa')"><span class="service-icon">▤</span>Visa</button>
-  <button class="service-tab" type="button" onclick="selectService(this,'Search Booking')"><span class="service-icon">⌕</span>Search Booking</button>
-  <button class="service-tab" type="button" onclick="selectService(this,'Appointment Booking')"><span class="service-icon">▦</span>Appointment Booking</button>
-  <button class="service-tab" type="button" onclick="selectService(this,'File Preparation')"><span class="service-icon">▤</span>File Preparation</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Search Booking')"><span class="service-icon">⌕</span>Booking</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'Appointment Booking')"><span class="service-icon">▦</span>Appointments</button>
+  <button class="service-tab" type="button" onclick="selectService(this,'File Preparation')"><span class="service-icon">▤</span>File Prep</button>
   <button class="service-tab" type="button" onclick="selectService(this,'Insurance')"><span class="service-icon">✚</span>Insurance</button>
  </div>
  <div class="booking">
