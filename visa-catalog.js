@@ -126,7 +126,7 @@
       const group = el("fieldset", "visa-pax");
       group.append(el("legend", "", "Passenger " + i));
       const grid = el("div", "visa-pax-grid");
-      [["Full name as per passport", "text", "Full name"], ["Passport number", "text", "Passport number"], ["Date of birth", "date", "Date of birth"], ["Nationality", "text", "Nationality"]].forEach(([label, type, placeholder]) => {
+      [["Applicant full name", "text", "Full name as per passport"]].forEach(([label, type, placeholder]) => {
         const field = el("label", "visa-pax-field");
         field.append(el("span", "", label));
         const input = el("input");
@@ -140,6 +140,7 @@
       group.append(grid);
       wrap.append(group);
     }
+    wrap.append(el("p", "visa-booking-feedback", "Passport number, date of birth and supporting documents will be requested later through an appropriate secure process."));
   }
 
   document.getElementById("visaApplicantCount")?.addEventListener("change", renderApplicants);
@@ -170,7 +171,8 @@
       "Email: " + (email || "Not provided"),
       "Applicants: " + pax.length,
       ...pax,
-      "Required documents: " + value(p, "Required Documents", "To be confirmed")
+      "Required documents: " + value(p, "Required Documents", "To be confirmed"),
+      "Passport details and documents: To be provided later through a secure process."
     ].join("\n");
     const wa = window.open("about:blank", "_blank");
     submit.disabled = true;
