@@ -83,12 +83,16 @@
         throw new Error(err.message || err.details || "Could not load the visa catalogue.");
       }
       const rows = await response.json();
+      const activeRows = rows.filter(row =>
+        row.payload &&
+        String(row.payload["Status"] || row.status || "").trim().toLowerCase() === "active"
+      );
       host.replaceChildren();
-      if (!rows.length) {
-        host.append(el("p", "visa-catalog-message", "No visas are available right now. Please check back soon or contact our team."));
+      if (!activeRows.length) {
+        host.append(el("p", "visa-catalog-message", "No active visas are available right now. Please check back soon or contact our team."));
         return;
       }
-      rows.filter(row => row.payload && (row.payload["Status"] || row.status) === "Active").forEach(row => host.append(renderCard(row)));
+      activeRows.forEach(row => host.append(renderCard(row)));
     } catch (error) {
       host.replaceChildren(el("p", "visa-catalog-message", "Visa listings could not be loaded. Please contact DunyaTrip on WhatsApp for current options."));
       console.error("Visa catalogue:", error);
