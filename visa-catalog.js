@@ -19,12 +19,23 @@
   };
   const headers = extra => ({ apikey: key, Authorization: "Bearer " + key, ...extra });
 
+  function publicVisaImageUrl(rawUrl) {
+    if (!rawUrl) return "";
+    try {
+      const image = new URL(rawUrl);
+      image.pathname = image.pathname.replace("/storage/v1/object/sign/visa-images/", "/storage/v1/object/public/visa-images/").replace("/storage/v1/object/authenticated/visa-images/", "/storage/v1/object/public/visa-images/");
+      image.search = "";
+      image.hash = "";
+      return image.href;
+    } catch { return rawUrl; }
+  }
+
   function renderCard(record) {
     const p = record.payload || {};
     const card = el("article", "visa-product-card");
     const imageWrap = el("div", "visa-product-image");
     if (p["Image URL"]) {
-      const img = el("img"); img.src = p["Image URL"];
+      const img = el("img"); img.src = publicVisaImageUrl(p["Image URL"]);
       img.alt = value(p, "Country", "Visa destination") + " visa"; img.loading = "lazy";
       img.onerror = () => { img.remove(); imageWrap.append(el("div", "visa-image-fallback", "✈")); };
       imageWrap.append(img);
