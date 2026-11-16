@@ -121,10 +121,10 @@
     paid.addEventListener("click", async () => {
       paid.disabled = true; paid.textContent = "Submitting…";
       try {
-        const updatedMessage = booking.message + "\nPayment claim: Verification Pending";
-        const response = await fetch(url + "/rest/v1/enquiries?id=eq." + encodeURIComponent(booking.id), {
-          method: "PATCH", headers: headers({ "Content-Type": "application/json", Prefer: "return=minimal" }),
-          body: JSON.stringify({ status: "In Progress", message: updatedMessage })
+        const response = await fetch(url + "/rest/v1/rpc/submit_public_visa_payment_claim", {
+          method: "POST",
+          headers: headers({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ p_booking_id: booking.id, p_payment_token: booking.payment_token })
         });
         if (!response.ok) throw new Error("Could not update payment status. Please contact DunyaTrip.");
         panel.replaceChildren(el("h3", "", "Thank you! Your payment update has been received."));
@@ -161,14 +161,16 @@
     ].join("\n");
     submit.disabled = true; submit.textContent = "Submitting…"; feedback.textContent = "Submitting your booking…";
     try {
-      const response = await fetch(url + "/rest/v1/enquiries", {
+      const response = await fetch(url + "/rest/v1/rpc/submit_public_visa_booking", {
         method: "POST",
-        headers: headers({ "Content-Type": "application/json", Prefer: "return=representation" }),
-        body: JSON.stringify({ customer_name: customer, phone, email: email || null, service_type: "Visa", message: details, status: "New" })
+        headers: headers({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ p_customer_name: customer, p_phone: phone, p_email: email || null, p_message: details })
       });
-      const rows = await response.json().catch(() => []);
-      if (!response.ok || !rows[0]?.id) throw new Error(rows.message || rows.details || "Could not submit your booking. Please try again.");
-      currentBooking = rows[0];
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.id || !result?.payment_token) {
+        throw new Error(result?.message || result?.details || "Could not submit your booking. Please try again.");
+      }
+      currentBooking = { id: result.id, payment_token: result.payment_token, message: details };
       await showPaymentDetails(currentBooking, selectedVisa);
     } catch (error) {
       feedback.textContent = error.message || "Something went wrong. Please try again.";
