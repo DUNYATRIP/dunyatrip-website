@@ -33,7 +33,7 @@
     body.append(el("div", "visa-country", value(p, "Country", "Destination")));
     body.append(el("h3", "visa-product-title", value(p, "Visa Name", "Visa") + " Visa"));
     const meta = el("div", "visa-product-meta");
-    [["Entry", "Entry"], ["Visa Format", "Visa Format"], ["Duration", "Duration"], ["Category", "Category"], ["Processing", "Processing Time"]].forEach(([label, k]) => {
+    [["Entry", "Entry"], ["Visa Type", "Visa Format"], ["Duration", "Duration"], ["Category", "Category"], ["Processing", "Processing Time"]].forEach(([label, k]) => {
       const item = el("div", "visa-meta-item"); item.append(el("small", "", label), el("strong", "", value(p, k))); meta.append(item);
     });
     body.append(meta);
