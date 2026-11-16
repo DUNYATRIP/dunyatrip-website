@@ -94,25 +94,14 @@
     panel.append(el("p", "", "Booking reference: " + booking.id));
     panel.append(el("p", "", "Please transfer the amount using one of the payment methods below."));
     const list = el("div", "visa-payment-methods");
-    try {
-      const params = new URLSearchParams({ select: "payload,status", module_key: "eq.payments/payment-methods", order: "created_at.desc" });
-      const response = await fetch(url + "/rest/v1/admin_records?" + params, { headers: headers() });
-      if (!response.ok) throw new Error("Payment methods are not available.");
-      const rows = await response.json();
-      const methods = rows.filter(row => row.payload && String(row.payload["Status"] || row.status || "Active").toLowerCase() === "active");
-      methods.forEach(row => {
-        const p = row.payload;
-        const card = el("div", "visa-payment-method");
-        [["Bank", "Bank Name"], ["Account Title", "Account Title"], ["Account Number", "Account Number"], ["IBAN", "IBAN"], ["Method", "Method"]].forEach(([label, key]) => {
-          if (p[key]) { const line = el("p", ""); line.append(el("b", "", label + ": "), document.createTextNode(p[key])); card.append(line); }
-        });
-        if (p["Bank"] && !p["Bank Name"]) card.prepend(el("strong", "", p["Bank"]));
-        list.append(card);
-      });
-      if (!methods.length) list.append(el("p", "", "Bank transfer details are not available yet. Please contact DunyaTrip on WhatsApp before making payment."));
-    } catch {
-      list.append(el("p", "", "Payment details could not be loaded. Please contact DunyaTrip on WhatsApp before making payment."));
-    }
+    const card = el("div", "visa-payment-method");
+    card.append(el("h4", "", "Bank Transfer Details"));
+    [["Bank", "MCB Bank"], ["Account Title", "SOHAIL MALIK"], ["Account Number", "1636335501008929"], ["IBAN", "PK15MUCB1636335501008929"]].forEach(([label, detail]) => {
+      const line = el("p", "");
+      line.append(el("b", "", label + ": "), document.createTextNode(detail));
+      card.append(line);
+    });
+    list.append(card);
     panel.append(list);
     const amount = el("p", "visa-payment-amount", "Amount: " + money(visa.payload || {}));
     panel.append(amount);
@@ -127,8 +116,8 @@
           body: JSON.stringify({ p_booking_id: booking.id, p_payment_token: booking.payment_token })
         });
         if (!response.ok) throw new Error("Could not update payment status. Please contact DunyaTrip.");
-        panel.replaceChildren(el("h3", "", "Thank you! Your payment update has been received."));
-        panel.append(el("p", "", "DunyaTrip team will contact you within 10 minutes to confirm your booking."));
+        panel.replaceChildren(el("h3", "", "Aapki payment verify ki ja rahi hai."));
+        panel.append(el("p", "", "DunyaTrip team aapki payment check kar rahi hai. Aapko thori dair mein confirmation de di jayegi."));
         const done = el("button", "btn visa-booking-submit", "Done"); done.type = "button"; done.addEventListener("click", closeBooking); panel.append(done);
       } catch (error) {
         paid.disabled = false; paid.textContent = "I Have Paid";
