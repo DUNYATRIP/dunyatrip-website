@@ -127,8 +127,8 @@
           body: JSON.stringify({ status: "In Progress", message: updatedMessage })
         });
         if (!response.ok) throw new Error("Could not update payment status. Please contact DunyaTrip.");
-        panel.replaceChildren(el("h3", "", "Your payment is being verified"));
-        panel.append(el("p", "", "We have received your payment update. Our team will check it and contact you."));
+        panel.replaceChildren(el("h3", "", "Thank you! Your payment update has been received."));
+        panel.append(el("p", "", "DunyaTrip team will contact you within 10 minutes to confirm your booking."));
         const done = el("button", "btn visa-booking-submit", "Done"); done.type = "button"; done.addEventListener("click", closeBooking); panel.append(done);
       } catch (error) {
         paid.disabled = false; paid.textContent = "I Have Paid";
