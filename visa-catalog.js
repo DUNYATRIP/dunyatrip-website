@@ -7,6 +7,7 @@
   const form = document.getElementById("visaBookingForm");
   const feedback = document.getElementById("visaBookingFeedback");
   let selectedVisa = null;
+  let currentBooking = null;
 
   const value = (p, k, fallback = "—") => String(p?.[k] ?? "").trim() || fallback;
   const money = p => p["Price (PKR)"] ? "PKR " + Number(p["Price (PKR)"]).toLocaleString("en-PK") : "Price on request";
@@ -16,16 +17,15 @@
     if (txt !== undefined) n.textContent = txt;
     return n;
   };
+  const headers = extra => ({ apikey: key, Authorization: "Bearer " + key, ...extra });
 
   function renderCard(record) {
     const p = record.payload || {};
     const card = el("article", "visa-product-card");
     const imageWrap = el("div", "visa-product-image");
     if (p["Image URL"]) {
-      const img = el("img");
-      img.src = p["Image URL"];
-      img.alt = value(p, "Country", "Visa destination") + " visa";
-      img.loading = "lazy";
+      const img = el("img"); img.src = p["Image URL"];
+      img.alt = value(p, "Country", "Visa destination") + " visa"; img.loading = "lazy";
       img.onerror = () => { img.remove(); imageWrap.append(el("div", "visa-image-fallback", "✈")); };
       imageWrap.append(img);
     } else imageWrap.append(el("div", "visa-image-fallback", "✈"));
@@ -33,117 +33,112 @@
     body.append(el("div", "visa-country", value(p, "Country", "Destination")));
     body.append(el("h3", "visa-product-title", value(p, "Visa Name", "Visa") + " Visa"));
     const meta = el("div", "visa-product-meta");
-    [["Entry", "Entry"], ["Duration", "Duration"], ["Category", "Category"], ["Processing", "Processing Time"]].forEach(([label, key]) => {
-      const item = el("div", "visa-meta-item");
-      item.append(el("small", "", label), el("strong", "", value(p, key)));
-      meta.append(item);
+    [["Entry", "Entry"], ["Duration", "Duration"], ["Category", "Category"], ["Processing", "Processing Time"]].forEach(([label, k]) => {
+      const item = el("div", "visa-meta-item"); item.append(el("small", "", label), el("strong", "", value(p, k))); meta.append(item);
     });
     body.append(meta);
     const price = el("div", "visa-price-row");
     price.append(el("strong", "visa-price", money(p)));
-    const book = el("button", "btn visa-book-button", "Book Now →");
-    book.type = "button";
-    book.addEventListener("click", () => openBooking(record));
-    price.append(book);
-    body.append(price);
+    const book = el("button", "btn visa-book-button", "Book Now →"); book.type = "button";
+    book.addEventListener("click", () => openBooking(record)); price.append(book); body.append(price);
     if (p["Visa Description"] || p["Required Documents"] || p["Terms & Conditions"]) {
-      const details = el("details", "visa-extra");
-      details.append(el("summary", "", "Visa details & requirements"));
-      [["Visa Description", "Visa Description"], ["Required Documents", "Required Documents"], ["Terms & Conditions", "Terms & Conditions"]].forEach(([label, key]) => {
-        if (!p[key]) return;
-        const section = el("div", "visa-extra-section");
-        section.append(el("b", "", label), el("p", "", p[key]));
-        details.append(section);
-      });
-      body.append(details);
+      const details = el("details", "visa-extra"); details.append(el("summary", "", "Visa details & requirements"));
+      [["Visa Description", "Visa Description"], ["Required Documents", "Required Documents"], ["Terms & Conditions", "Terms & Conditions"]].forEach(([label, k]) => {
+        if (!p[k]) return; const section = el("div", "visa-extra-section");
+        section.append(el("b", "", label), el("p", "", p[k])); details.append(section);
+      }); body.append(details);
     }
-    card.append(imageWrap, body);
-    return card;
+    card.append(imageWrap, body); return card;
   }
 
   async function loadVisas() {
     if (!host) return;
-    if (!url || !key) {
-      host.replaceChildren(el("p", "visa-catalog-message", "Visa catalogue is temporarily unavailable. Please contact DunyaTrip for assistance."));
-      return;
-    }
+    if (!url || !key) { host.replaceChildren(el("p", "visa-catalog-message", "Visa catalogue is temporarily unavailable. Please contact DunyaTrip.")); return; }
     host.replaceChildren(el("p", "visa-catalog-message", "Loading available visas…"));
-    const params = new URLSearchParams({
-      select: "id,module_key,payload,status,created_at",
-      module_key: "eq.administration/visa-management",
-      status: "eq.Active",
-      order: "created_at.desc"
-    });
+    const params = new URLSearchParams({ select: "id,module_key,payload,status,created_at", module_key: "eq.administration/visa-management", status: "eq.Active", order: "created_at.desc" });
     try {
-      const response = await fetch(url + "/rest/v1/admin_records?" + params, {
-        headers: { apikey: key, Authorization: "Bearer " + key }
-      });
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || err.details || "Could not load the visa catalogue.");
-      }
+      const response = await fetch(url + "/rest/v1/admin_records?" + params, { headers: headers() });
+      if (!response.ok) throw new Error("Could not load visa catalogue.");
       const rows = await response.json();
-      const activeRows = rows.filter(row =>
-        row.payload &&
-        String(row.payload["Status"] || row.status || "").trim().toLowerCase() === "active"
-      );
+      const active = rows.filter(row => row.payload && String(row.payload["Status"] || row.status || "").trim().toLowerCase() === "active");
       host.replaceChildren();
-      if (!activeRows.length) {
-        host.append(el("p", "visa-catalog-message", "No active visas are available right now. Please check back soon or contact our team."));
-        return;
-      }
-      activeRows.forEach(row => host.append(renderCard(row)));
+      if (!active.length) { host.append(el("p", "visa-catalog-message", "No active visas are available right now.")); return; }
+      active.forEach(row => host.append(renderCard(row)));
     } catch (error) {
-      host.replaceChildren(el("p", "visa-catalog-message", "Visa listings could not be loaded. Please contact DunyaTrip on WhatsApp for current options."));
+      host.replaceChildren(el("p", "visa-catalog-message", "Visa listings could not be loaded. Please contact DunyaTrip on WhatsApp."));
       console.error("Visa catalogue:", error);
     }
   }
 
   function openBooking(record) {
-    selectedVisa = record;
+    selectedVisa = record; currentBooking = null;
     const p = record.payload || {};
-    document.getElementById("visaSelectedName").textContent =
-      [value(p, "Country", ""), value(p, "Visa Name", "") + " Visa", value(p, "Entry", ""), value(p, "Duration", "")].filter(Boolean).join(" · ");
+    document.getElementById("visaSelectedName").textContent = [value(p, "Country", ""), value(p, "Visa Name", "") + " Visa", value(p, "Entry", ""), value(p, "Duration", "")].filter(Boolean).join(" · ");
     document.getElementById("visaSelectedPrice").textContent = money(p);
+    form.hidden = false;
+    document.getElementById("visaPaymentPanel")?.remove();
     document.getElementById("visaApplicantCount").value = "1";
-    renderApplicants();
     feedback.textContent = "";
-    modal.hidden = false;
-    document.body.classList.add("visa-modal-open");
+    modal.hidden = false; document.body.classList.add("visa-modal-open");
   }
-
   function closeBooking() {
-    modal.hidden = true;
-    document.body.classList.remove("visa-modal-open");
-    selectedVisa = null;
+    modal.hidden = true; document.body.classList.remove("visa-modal-open");
+    selectedVisa = null; currentBooking = null;
   }
 
-  function renderApplicants() {
-    const count = Number(document.getElementById("visaApplicantCount").value || 1);
-    const wrap = document.getElementById("visaApplicants");
-    wrap.replaceChildren();
-    for (let i = 1; i <= count; i++) {
-      const group = el("fieldset", "visa-pax");
-      group.append(el("legend", "", "Passenger " + i));
-      const grid = el("div", "visa-pax-grid");
-      [["Applicant full name", "text", "Full name as per passport"]].forEach(([label, type, placeholder]) => {
-        const field = el("label", "visa-pax-field");
-        field.append(el("span", "", label));
-        const input = el("input");
-        input.type = type;
-        input.placeholder = placeholder;
-        input.required = true;
-        input.name = "pax_" + i + "_" + label.toLowerCase().replaceAll(" ", "_");
-        field.append(input);
-        grid.append(field);
+  async function showPaymentDetails(booking, visa) {
+    form.hidden = true;
+    const panel = el("section", "visa-payment-panel");
+    panel.id = "visaPaymentPanel";
+    panel.append(el("h3", "", "Booking submitted successfully"));
+    panel.append(el("p", "", "Booking reference: " + booking.id));
+    panel.append(el("p", "", "Please transfer the amount using one of the payment methods below."));
+    const list = el("div", "visa-payment-methods");
+    try {
+      const params = new URLSearchParams({ select: "payload,status", module_key: "eq.payments/payment-methods", order: "created_at.desc" });
+      const response = await fetch(url + "/rest/v1/admin_records?" + params, { headers: headers() });
+      if (!response.ok) throw new Error("Payment methods are not available.");
+      const rows = await response.json();
+      const methods = rows.filter(row => row.payload && String(row.payload["Status"] || row.status || "Active").toLowerCase() === "active");
+      methods.forEach(row => {
+        const p = row.payload;
+        const card = el("div", "visa-payment-method");
+        [["Bank", "Bank Name"], ["Account Title", "Account Title"], ["Account Number", "Account Number"], ["IBAN", "IBAN"], ["Method", "Method"]].forEach(([label, key]) => {
+          if (p[key]) { const line = el("p", ""); line.append(el("b", "", label + ": "), document.createTextNode(p[key])); card.append(line); }
+        });
+        if (p["Bank"] && !p["Bank Name"]) card.prepend(el("strong", "", p["Bank"]));
+        list.append(card);
       });
-      group.append(grid);
-      wrap.append(group);
+      if (!methods.length) list.append(el("p", "", "Bank transfer details are not available yet. Please contact DunyaTrip on WhatsApp before making payment."));
+    } catch {
+      list.append(el("p", "", "Payment details could not be loaded. Please contact DunyaTrip on WhatsApp before making payment."));
     }
-    wrap.append(el("p", "visa-booking-feedback", "Passport number, date of birth and supporting documents will be requested later through an appropriate secure process."));
+    panel.append(list);
+    const amount = el("p", "visa-payment-amount", "Amount: " + money(visa.payload || {}));
+    panel.append(amount);
+    const paid = el("button", "btn visa-booking-submit", "I Have Paid");
+    paid.type = "button";
+    paid.addEventListener("click", async () => {
+      paid.disabled = true; paid.textContent = "Submitting…";
+      try {
+        const updatedMessage = booking.message + "\nPayment claim: Verification Pending";
+        const response = await fetch(url + "/rest/v1/enquiries?id=eq." + encodeURIComponent(booking.id), {
+          method: "PATCH", headers: headers({ "Content-Type": "application/json", Prefer: "return=minimal" }),
+          body: JSON.stringify({ status: "In Progress", message: updatedMessage })
+        });
+        if (!response.ok) throw new Error("Could not update payment status. Please contact DunyaTrip.");
+        panel.replaceChildren(el("h3", "", "Your payment is being verified"));
+        panel.append(el("p", "", "We have received your payment update. Our team will check it and contact you."));
+        const done = el("button", "btn visa-booking-submit", "Done"); done.type = "button"; done.addEventListener("click", closeBooking); panel.append(done);
+      } catch (error) {
+        paid.disabled = false; paid.textContent = "I Have Paid";
+        feedback.textContent = error.message || "Please try again.";
+      }
+    });
+    panel.append(paid);
+    modal.querySelector(".visa-modal-card").append(panel);
   }
 
-  document.getElementById("visaApplicantCount")?.addEventListener("change", renderApplicants);
   document.getElementById("visaBookingClose")?.addEventListener("click", closeBooking);
   modal?.addEventListener("click", e => { if (e.target === modal) closeBooking(); });
   form?.addEventListener("submit", async e => {
@@ -151,56 +146,34 @@
     if (!selectedVisa || !form.reportValidity()) return;
     const p = selectedVisa.payload || {};
     const submit = document.getElementById("visaBookingSubmit");
-    const pax = [...document.querySelectorAll("#visaApplicants fieldset")].map((group, i) => {
-      const data = {};
-      group.querySelectorAll("input").forEach(input => data[input.previousSibling?.textContent || input.name] = input.value.trim());
-      return "Passenger " + (i + 1) + ": " + Object.values(data).join(" | ");
-    });
     const phone = document.getElementById("visaCustomerPhone").value.trim();
     const customer = document.getElementById("visaCustomerName").value.trim();
     const email = document.getElementById("visaCustomerEmail").value.trim();
+    const applicants = document.getElementById("visaApplicantCount").value;
     const details = [
       "Visa booking request",
       "Visa: " + value(p, "Country", "") + " — " + value(p, "Visa Name", "") + " (" + value(p, "Category", "") + ")",
-      "Entry: " + value(p, "Entry", ""),
-      "Duration: " + value(p, "Duration", ""),
-      "Processing time: " + value(p, "Processing Time", ""),
-      "Price: " + money(p),
-      "Customer: " + customer,
-      "WhatsApp: " + phone,
-      "Email: " + (email || "Not provided"),
-      "Applicants: " + pax.length,
-      ...pax,
-      "Required documents: " + value(p, "Required Documents", "To be confirmed"),
-      "Passport details and documents: To be provided later through a secure process."
+      "Entry: " + value(p, "Entry", ""), "Duration: " + value(p, "Duration", ""),
+      "Processing time: " + value(p, "Processing Time", ""), "Price: " + money(p),
+      "Customer: " + customer, "WhatsApp: " + phone, "Email: " + (email || "Not provided"),
+      "Applicants: " + applicants, "Required documents: " + value(p, "Required Documents", "To be confirmed"),
+      "Document upload: Pending secure upload"
     ].join("\n");
-    const wa = window.open("about:blank", "_blank");
-    submit.disabled = true;
-    submit.textContent = "Submitting…";
-    feedback.textContent = "Your visa booking request is being submitted…";
+    submit.disabled = true; submit.textContent = "Submitting…"; feedback.textContent = "Submitting your booking…";
     try {
       const response = await fetch(url + "/rest/v1/enquiries", {
         method: "POST",
-        headers: { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json", Prefer: "return=minimal" },
-        body: JSON.stringify({ customer_name: customer, phone, service_type: "Visa", message: details })
+        headers: headers({ "Content-Type": "application/json", Prefer: "return=representation" }),
+        body: JSON.stringify({ customer_name: customer, phone, email: email || null, service_type: "Visa", message: details, status: "New" })
       });
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || err.details || "Could not submit your booking request.");
-      }
-      const whatsappUrl = "https://wa.me/923071201353?text=" + encodeURIComponent("DunyaTrip Visa Booking Request\n\n" + details + "\n\nPlease contact this customer.");
-      if (wa) wa.location.href = whatsappUrl;
-      else window.location.href = whatsappUrl;
-      feedback.textContent = "Your request has been received. Our team will contact you shortly.";
-      form.reset();
-      closeBooking();
-      alert("Visa booking request submitted successfully. DunyaTrip team will contact you.");
+      const rows = await response.json().catch(() => []);
+      if (!response.ok || !rows[0]?.id) throw new Error(rows.message || rows.details || "Could not submit your booking. Please try again.");
+      currentBooking = rows[0];
+      await showPaymentDetails(currentBooking, selectedVisa);
     } catch (error) {
-      if (wa) wa.close();
       feedback.textContent = error.message || "Something went wrong. Please try again.";
     } finally {
-      submit.disabled = false;
-      submit.textContent = "Submit Booking Request →";
+      submit.disabled = false; submit.textContent = "Continue to Payment →";
     }
   });
 
